@@ -3,9 +3,9 @@
 using System.IO;
 using UnrealBuildTool;
 
-public class RuntimeMeshComponentEditor : ModuleRules
+public class RuntimeMeshComponent : ModuleRules
 {
-    public RuntimeMeshComponentEditor(ReadOnlyTargetRules rules) : base(rules)
+    public RuntimeMeshComponent(ReadOnlyTargetRules rules) : base(rules)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -18,8 +18,7 @@ public class RuntimeMeshComponentEditor : ModuleRules
             {
                 "Core",
 				// ... add other public dependencies that you statically link with here ...
-                
-            }
+			}
             );
 
 
@@ -27,26 +26,15 @@ public class RuntimeMeshComponentEditor : ModuleRules
             new string[]
             {
                 "CoreUObject",
-                // ... add private dependencies that you statically link with here ...	
                 "Engine",
-                "Slate",
-                "SlateCore",
+				// ... add private dependencies that you statically link with here ...	
                 "RenderCore",
                 "ShaderCore",
                 "RHI",
-                "UnrealEd",
-                "LevelEditor",
-                "PropertyEditor",
-                "RawMesh",
-                "AssetTools",
-                "AssetRegistry",
-                "Projects",
-                "EditorStyle",
-                "InputCore",
-
-                "RuntimeMeshComponent",
             }
             );
+
+
         DynamicallyLoadedModuleNames.AddRange(
             new string[]
             {
