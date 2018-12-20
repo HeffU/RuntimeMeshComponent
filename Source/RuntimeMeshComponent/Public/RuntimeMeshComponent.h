@@ -78,352 +78,590 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
 	void SetRuntimeMesh(URuntimeMesh* NewMesh);
 
+	// Wrapper functions --------------------------------------------------------------------------------------------------------------------------------
 
-	void CreateMeshSection(int32 SectionIndex, bool bWantsHighPrecisionTangents, bool bWantsHighPrecisionUVs, int32 NumUVs, bool bWants32BitIndices, bool bCreateCollision, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSection(SectionIndex, bWantsHighPrecisionTangents, bWantsHighPrecisionUVs, NumUVs, bWants32BitIndices, bCreateCollision, UpdateFrequency);
-	}
+		/*
+		Uses the correct function and checks for mesh validity to avoid crashes and improve performance
+		bCreateCollision and UpdateFrequency will only be used if the section is being created
+		*/
+		template<typename VertexType0, typename IndexType>
+		void SetMeshSection(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles, bool bCreateCollision = false,
+			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None) 
+		{
+			if (DoesSectionExist(SectionIndex)) {
+				if (InVertices0.Num() == 0) {
+					ClearMeshSection(SectionIndex);
+				}
+				else {
+					UpdateMeshSection(SectionIndex, InVertices0, InTriangles, UpdateFlags);
+				}
+			}
+			else if (InVertices0.Num() != 0) {
+				CreateMeshSection(SectionIndex, InVertices0, InTriangles, bCreateCollision, UpdateFrequency, UpdateFlags);
+			}
+		}
 
-	template<typename VertexType0, typename IndexType>
-	FORCEINLINE void CreateMeshSection(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles, bool bCreateCollision = false,
+		/*
+		Uses the correct function and checks for mesh validity to avoid crashes and improve performance
+		bCreateCollision and UpdateFrequency will only be used if the section is being created
+		*/
+		void SetMeshSection(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, bool bCreateCollision = false,
+			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			if (DoesSectionExist(SectionId)) {
+				if (MeshData->NumIndices() == 0) {
+					ClearMeshSection(SectionId);
+				}
+				else {
+					UpdateMeshSection(SectionId, MeshData, UpdateFlags);
+				}
+			}
+			else if (MeshData->NumIndices() != 0) {
+				CreateMeshSection(SectionId, MeshData, bCreateCollision, UpdateFrequency, UpdateFlags);
+			}
+		}
+
+		/*
+		Uses the correct function and checks for mesh validity to avoid crashes and improve performance
+		bCreateCollision and UpdateFrequency will only be used if the section is being created
+		*/
+		void SetMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+			const TArray<FVector2D>& UV0, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, bool bCreateCollision = false,
+			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None,
+			bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
+		{
+			if (DoesSectionExist(SectionIndex)) {
+				if (Vertices.Num() == 0) {
+					ClearMeshSection(SectionIndex);
+				}
+				else {
+					UpdateMeshSection(SectionIndex, Vertices, Normals, UV0, Colors, Tangents, UpdateFlags);
+				}
+			}
+			else if (Vertices.Num() != 0) {
+				CreateMeshSection(SectionIndex, Vertices, Triangles, Normals, UV0, Colors, Tangents, bCreateCollision,
+					UpdateFrequency, UpdateFlags, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
+			}
+		}
+
+		/*
+		Uses the correct function and checks for mesh validity to avoid crashes and improve performance
+		bCreateCollision and UpdateFrequency will only be used if the section is being created
+		*/
+		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Set Mesh Section", AutoCreateRefTerm = "Normals,Tangents,UV0,UV1,Colors"))
+			void SetMeshSection_Blueprint(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+				const TArray<FRuntimeMeshTangent>& Tangents, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FLinearColor>& Colors,
+				bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false,
+				EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
+		{
+			if (DoesSectionExist(SectionIndex)) {
+				if (Vertices.Num() == 0) {
+					ClearMeshSection(SectionIndex);
+				}
+				else {
+					UpdateMeshSection_Blueprint(SectionIndex, Vertices, Triangles, Normals, Tangents, UV0, UV1, Colors, 
+						bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles);
+				}
+			}
+			else if (Vertices.Num() != 0) {
+				CreateMeshSection_Blueprint(SectionIndex, Vertices, Triangles, Normals, Tangents, UV0, UV1, Colors, bCreateCollision,
+					bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
+			}
+		}
+
+		/*
+		Uses the correct function and checks for mesh validity to avoid crashes and improve performance
+		bCreateCollision and UpdateFrequency will only be used if the section is being created
+		*/
+		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Set Mesh Section Packed", AutoCreateRefTerm = "Normals,Tangents,UV0,UV1,Colors"))
+			void SetMeshSectionPacked_Blueprint(int32 SectionIndex, const TArray<FRuntimeMeshBlueprintVertexSimple>& Vertices, const TArray<int32>& Triangles,
+				bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average,
+				bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
+		{
+			if (DoesSectionExist(SectionIndex)) {
+				if (Vertices.Num() == 0) {
+					ClearMeshSection(SectionIndex);
+				}
+				else {
+					UpdateMeshSectionPacked_Blueprint(SectionIndex, Vertices, Triangles, bCalculateNormalTangent, bShouldCreateHardTangents, 
+						bGenerateTessellationTriangles);
+				}
+			}
+			else if (Vertices.Num() != 0) {
+				CreateMeshSectionPacked_Blueprint(SectionIndex, Vertices, Triangles, bCreateCollision, bCalculateNormalTangent, bShouldCreateHardTangents,
+					bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
+			}
+		}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Create Mesh Section (Packed) --------------------------------------------------------------------------------------------------------------------------------
+
+		/*
+		Creates or updates a mesh section, with specified parameters but empty
+		*/
+		void CreateMeshSection(int32 SectionIndex, bool bWantsHighPrecisionTangents, bool bWantsHighPrecisionUVs, int32 NumUVs, bool bWants32BitIndices, bool bCreateCollision, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSection(SectionIndex, bWantsHighPrecisionTangents, bWantsHighPrecisionUVs, NumUVs, bWants32BitIndices, bCreateCollision, UpdateFrequency);
+		}
+
+		/*
+		Creates or updates a mesh section, using the specified templated vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the vertex length is 0
+		*/
+		template<typename VertexType0, typename IndexType>
+		FORCEINLINE void CreateMeshSection(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles, bool bCreateCollision = false,
+			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSection(SectionIndex, InVertices0, InTriangles, bCreateCollision, UpdateFrequency, UpdateFlags);
+		}
+
+		/*
+		Creates or updates a mesh section, using the specified templated vertices and bounding box
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the vertex length is 0
+		*/
+		template<typename VertexType0, typename IndexType>
+		FORCEINLINE void CreateMeshSection(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles, const FBox& BoundingBox,
+			bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSection(SectionIndex, InVertices0, InTriangles, BoundingBox, bCreateCollision, UpdateFrequency, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1, typename IndexType>
+		FORCEINLINE void CreateMeshSectionDualBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<IndexType>& InTriangles, bool bCreateCollision = false,
+			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSectionDualBuffer(SectionIndex, InVertices0, InVertices1, InTriangles, bCreateCollision, UpdateFrequency, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1, typename IndexType>
+		FORCEINLINE void CreateMeshSectionDualBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<IndexType>& InTriangles, const FBox& BoundingBox,
+			bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSectionDualBuffer(SectionIndex, InVertices0, InVertices1, InTriangles, BoundingBox, bCreateCollision, UpdateFrequency, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
+		FORCEINLINE void CreateMeshSectionTripleBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2, TArray<IndexType>& InTriangles,
+			bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSectionTripleBuffer(SectionIndex, InVertices0, InVertices1, InVertices2, InTriangles, bCreateCollision, UpdateFrequency, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
+		FORCEINLINE void CreateMeshSectionTripleBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2, TArray<IndexType>& InTriangles,
+			const FBox& BoundingBox, bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSectionTripleBuffer(SectionIndex, InVertices0, InVertices1, InVertices2, InTriangles, BoundingBox, bCreateCollision, UpdateFrequency, UpdateFlags);
+		}
+
+
+
+
+	// Update Mesh Section (Packed) --------------------------------------------------------------------------------------------------------------------------------
+
+		/*
+		Changes the values of an existing mesh section.
+		Will cause a crash if the mesh section doesn't exist or the vertex length is 0
+		*/
+		template<typename VertexType0>
+		FORCEINLINE void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0,
+			ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionId, InVertices0, UpdateFlags);
+		}
+
+		/*
+		Changes the values of an existing mesh section.
+		Will cause a crash if the mesh section doesn't exist or the vertex length is 0
+		*/
+		template<typename VertexType0>
+		FORCEINLINE void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0,
+			const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionId, InVertices0, BoundingBox, UpdateFlags);
+		}
+
+		/*
+		Changes the values of an existing mesh section.
+		Will cause a crash if the mesh section doesn't exist or the vertex length is 0
+		*/
+		template<typename VertexType0, typename IndexType>
+		FORCEINLINE void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles,
+			ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionId, InVertices0, InTriangles, UpdateFlags);
+		}
+
+		/*
+		Changes the values of an existing mesh section.
+		Will cause a crash if the mesh section doesn't exist or the vertex length is 0
+		*/
+		template<typename VertexType0, typename IndexType>
+		FORCEINLINE void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles,
+			const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionId, InVertices0, InTriangles, BoundingBox, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1>
+		FORCEINLINE void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1,
+			ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionDualBuffer(SectionId, InVertices0, InVertices1, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1>
+		FORCEINLINE void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1,
+			const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionDualBuffer(SectionId, InVertices0, InVertices1, BoundingBox, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1, typename IndexType>
+		FORCEINLINE void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1,
+			TArray<IndexType>& InTriangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionDualBuffer(SectionId, InVertices0, InVertices1, InTriangles, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1, typename IndexType>
+		FORCEINLINE void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<IndexType>& InTriangles,
+			const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionDualBuffer(SectionId, InVertices0, InVertices1, InTriangles, BoundingBox, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1, typename VertexType2>
+		FORCEINLINE void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
+			ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionTripleBuffer(SectionId, InVertices0, InVertices1, InVertices2, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1, typename VertexType2>
+		FORCEINLINE void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
+			const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionTripleBuffer(SectionId, InVertices0, InVertices1, InVertices2, BoundingBox, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
+		FORCEINLINE void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
+			TArray<IndexType>& InTriangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionTripleBuffer(SectionId, InVertices0, InVertices1, InVertices2, InTriangles, UpdateFlags);
+		}
+
+		template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
+		FORCEINLINE void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
+			TArray<IndexType>& InTriangles, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionTripleBuffer(SectionId, InVertices0, InVertices1, InVertices2, InTriangles, BoundingBox, UpdateFlags);
+		}
+
+
+
+
+		/** DEPRECATED! Use UpdateMeshSectionDualBuffer() instead.  Updates the dual buffer mesh section */
+		template<typename VertexType>
+		DEPRECATED(3.0, "UpdateMeshSection for dual buffer sections deprecated. Please use UpdateMeshSectionDualBuffer instead.")
+		void UpdateMeshSection(int32 SectionIndex, TArray<FVector>& VertexPositions, TArray<VertexType>& VertexData, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			UpdateMeshSectionDualBuffer(SectionIndex, VertexPositions, VertexData, UpdateFlags);
+		}
+
+		/** DEPRECATED! Use UpdateMeshSectionDualBuffer() instead.  Updates the dual buffer mesh section */
+		template<typename VertexType>
+		DEPRECATED(3.0, "UpdateMeshSection for dual buffer sections deprecated. Please use UpdateMeshSectionDualBuffer instead.")
+		void UpdateMeshSection(int32 SectionIndex, TArray<FVector>& VertexPositions, TArray<VertexType>& VertexData, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			UpdateMeshSectionDualBuffer(SectionIndex, VertexPositions, VertexData, BoundingBox, UpdateFlags);
+		}
+
+		/** DEPRECATED! Use UpdateMeshSectionDualBuffer() instead.  Updates the dual buffer mesh section */
+		template<typename VertexType>
+		DEPRECATED(3.0, "UpdateMeshSection for dual buffer sections deprecated. Please use UpdateMeshSectionDualBuffer instead.")
+		void UpdateMeshSection(int32 SectionIndex, TArray<FVector>& VertexPositions, TArray<VertexType>& VertexData, TArray<int32>& Triangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			UpdateMeshSectionDualBuffer(SectionIndex, VertexPositions, VertexData, Triangles, UpdateFlags);
+		}
+
+		/** DEPRECATED! Use UpdateMeshSectionDualBuffer() instead.  Updates the dual buffer mesh section */
+		template<typename VertexType>
+		DEPRECATED(3.0, "UpdateMeshSection for dual buffer sections deprecated. Please use UpdateMeshSectionDualBuffer instead.")
+		void UpdateMeshSection(int32 SectionIndex, TArray<FVector>& VertexPositions, TArray<VertexType>& VertexData, TArray<int32>& Triangles, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			UpdateMeshSectionDualBuffer(SectionIndex, VertexPositions, VertexData, Triangles, BoundingBox, UpdateFlags);
+		}
+
+
+
+
+
+		template<typename VertexType0>
+		FORCEINLINE void UpdateMeshSectionPrimaryBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionPrimaryBuffer(SectionId, InVertices0, UpdateFlags);
+		}
+
+		template<typename VertexType0>
+		FORCEINLINE void UpdateMeshSectionPrimaryBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionPrimaryBuffer(SectionId, InVertices0, BoundingBox, UpdateFlags);
+		}
+
+		template<typename VertexType1>
+		FORCEINLINE void UpdateMeshSectionSecondaryBuffer(int32 SectionId, TArray<VertexType1>& InVertices1, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionSecondaryBuffer(SectionId, InVertices1, UpdateFlags);
+		}
+
+		template<typename VertexType2>
+		FORCEINLINE void UpdateMeshSectionTertiaryBuffer(int32 SectionId, TArray<VertexType2>& InVertices2, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionTertiaryBuffer(SectionId, InVertices2, UpdateFlags);
+		}
+
+		template<typename IndexType>
+		FORCEINLINE void UpdateMeshSectionTriangles(int32 SectionId, TArray<IndexType>& InTriangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionTriangles(SectionId, InTriangles, UpdateFlags);
+		}
+
+
+
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//Create Mesh Section (Runtime Mesh Builder) --------------------------------------------------------------------------------------------------------------------------------
+
+		/*
+		Create or update a mesh section using a RuntimeMeshBuilder
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the vertex length is 0
+		*/
+		FORCEINLINE void CreateMeshSection(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, bool bCreateCollision = false,
 		EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSection(SectionIndex, InVertices0, InTriangles, bCreateCollision, UpdateFrequency, UpdateFlags);
-	}
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSection(SectionId, MeshData, bCreateCollision, UpdateFrequency, UpdateFlags);
+		}
 
-	template<typename VertexType0, typename IndexType>
-	FORCEINLINE void CreateMeshSection(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles, const FBox& BoundingBox,
-		bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSection(SectionIndex, InVertices0, InTriangles, BoundingBox, bCreateCollision, UpdateFrequency, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename VertexType1, typename IndexType>
-	FORCEINLINE void CreateMeshSectionDualBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<IndexType>& InTriangles, bool bCreateCollision = false,
+		/*
+		Create or update a mesh section using a RuntimeMeshBuilder
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the vertex length is 0
+		*/
+		FORCEINLINE void CreateMeshSectionByMove(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, bool bCreateCollision = false,
 		EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSectionDualBuffer(SectionIndex, InVertices0, InVertices1, InTriangles, bCreateCollision, UpdateFrequency, UpdateFlags);
-	}
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSectionByMove(SectionId, MeshData, bCreateCollision, UpdateFrequency, UpdateFlags);
+		}
 
-	template<typename VertexType0, typename VertexType1, typename IndexType>
-	FORCEINLINE void CreateMeshSectionDualBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<IndexType>& InTriangles, const FBox& BoundingBox,
-		bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSectionDualBuffer(SectionIndex, InVertices0, InVertices1, InTriangles, BoundingBox, bCreateCollision, UpdateFrequency, UpdateFlags);
-	}
+		/*
+		Create or update a mesh section using a RuntimeMeshBuilder
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the vertex length is 0
+		*/
+		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
+		void CreateMeshSectionFromBuilder(int32 SectionId, URuntimeBlueprintMeshBuilder* MeshData, bool bCreateCollision = false,
+			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average/*, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None*/)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSectionFromBuilder(SectionId, MeshData, bCreateCollision, UpdateFrequency/*, UpdateFlags*/);
+		}
 
-	template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
-	FORCEINLINE void CreateMeshSectionTripleBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2, TArray<IndexType>& InTriangles,
-		bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSectionTripleBuffer(SectionIndex, InVertices0, InVertices1, InVertices2, InTriangles, bCreateCollision, UpdateFrequency, UpdateFlags);
-	}
+	// Update Mesh Section (Runtime Mesh Builder) --------------------------------------------------------------------------------------------------------------------------------
 
-	template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
-	FORCEINLINE void CreateMeshSectionTripleBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2, TArray<IndexType>& InTriangles,
-		const FBox& BoundingBox, bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSectionTripleBuffer(SectionIndex, InVertices0, InVertices1, InVertices2, InTriangles, BoundingBox, bCreateCollision, UpdateFrequency, UpdateFlags);
-	}
+		/*
+		Update a mesh section using a RuntimeMeshBuilder
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the section doesn't exist or vertex length is 0
+		*/
+		FORCEINLINE void UpdateMeshSection(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionId, MeshData, UpdateFlags);
+		}
 
+		/*
+		Update a mesh section using a RuntimeMeshBuilder
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the section doesn't exist or vertex length is 0
+		*/
+		FORCEINLINE void UpdateMeshSectionByMove(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionByMove(SectionId, MeshData, UpdateFlags);
+		}
 
-
-
-
-
-
-	template<typename VertexType0>
-	FORCEINLINE void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0,
-		ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionId, InVertices0, UpdateFlags);
-	}
-
-	template<typename VertexType0>
-	FORCEINLINE void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0,
-		const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionId, InVertices0, BoundingBox, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename IndexType>
-	FORCEINLINE void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles,
-		ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionId, InVertices0, InTriangles, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename IndexType>
-	FORCEINLINE void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles,
-		const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionId, InVertices0, InTriangles, BoundingBox, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename VertexType1>
-	FORCEINLINE void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1,
-		ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionDualBuffer(SectionId, InVertices0, InVertices1, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename VertexType1>
-	FORCEINLINE void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1,
-		const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionDualBuffer(SectionId, InVertices0, InVertices1, BoundingBox, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename VertexType1, typename IndexType>
-	FORCEINLINE void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1,
-		TArray<IndexType>& InTriangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionDualBuffer(SectionId, InVertices0, InVertices1, InTriangles, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename VertexType1, typename IndexType>
-	FORCEINLINE void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<IndexType>& InTriangles,
-		const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionDualBuffer(SectionId, InVertices0, InVertices1, InTriangles, BoundingBox, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename VertexType1, typename VertexType2>
-	FORCEINLINE void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
-		ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionTripleBuffer(SectionId, InVertices0, InVertices1, InVertices2, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename VertexType1, typename VertexType2>
-	FORCEINLINE void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
-		const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionTripleBuffer(SectionId, InVertices0, InVertices1, InVertices2, BoundingBox, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
-	FORCEINLINE void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
-		TArray<IndexType>& InTriangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionTripleBuffer(SectionId, InVertices0, InVertices1, InVertices2, InTriangles, UpdateFlags);
-	}
-
-	template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
-	FORCEINLINE void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
-		TArray<IndexType>& InTriangles, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionTripleBuffer(SectionId, InVertices0, InVertices1, InVertices2, InTriangles, BoundingBox, UpdateFlags);
-	}
-
-
-
-
-	/** DEPRECATED! Use UpdateMeshSectionDualBuffer() instead.  Updates the dual buffer mesh section */
-	template<typename VertexType>
-	DEPRECATED(3.0, "UpdateMeshSection for dual buffer sections deprecated. Please use UpdateMeshSectionDualBuffer instead.")
-	void UpdateMeshSection(int32 SectionIndex, TArray<FVector>& VertexPositions, TArray<VertexType>& VertexData, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		UpdateMeshSectionDualBuffer(SectionIndex, VertexPositions, VertexData, UpdateFlags);
-	}
-
-	/** DEPRECATED! Use UpdateMeshSectionDualBuffer() instead.  Updates the dual buffer mesh section */
-	template<typename VertexType>
-	DEPRECATED(3.0, "UpdateMeshSection for dual buffer sections deprecated. Please use UpdateMeshSectionDualBuffer instead.")
-	void UpdateMeshSection(int32 SectionIndex, TArray<FVector>& VertexPositions, TArray<VertexType>& VertexData, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		UpdateMeshSectionDualBuffer(SectionIndex, VertexPositions, VertexData, BoundingBox, UpdateFlags);
-	}
-
-	/** DEPRECATED! Use UpdateMeshSectionDualBuffer() instead.  Updates the dual buffer mesh section */
-	template<typename VertexType>
-	DEPRECATED(3.0, "UpdateMeshSection for dual buffer sections deprecated. Please use UpdateMeshSectionDualBuffer instead.")
-	void UpdateMeshSection(int32 SectionIndex, TArray<FVector>& VertexPositions, TArray<VertexType>& VertexData, TArray<int32>& Triangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		UpdateMeshSectionDualBuffer(SectionIndex, VertexPositions, VertexData, Triangles, UpdateFlags);
-	}
-
-	/** DEPRECATED! Use UpdateMeshSectionDualBuffer() instead.  Updates the dual buffer mesh section */
-	template<typename VertexType>
-	DEPRECATED(3.0, "UpdateMeshSection for dual buffer sections deprecated. Please use UpdateMeshSectionDualBuffer instead.")
-	void UpdateMeshSection(int32 SectionIndex, TArray<FVector>& VertexPositions, TArray<VertexType>& VertexData, TArray<int32>& Triangles, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		UpdateMeshSectionDualBuffer(SectionIndex, VertexPositions, VertexData, Triangles, BoundingBox, UpdateFlags);
-	}
-
-
-
-
-
-	template<typename VertexType0>
-	FORCEINLINE void UpdateMeshSectionPrimaryBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionPrimaryBuffer(SectionId, InVertices0, UpdateFlags);
-	}
-
-	template<typename VertexType0>
-	FORCEINLINE void UpdateMeshSectionPrimaryBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionPrimaryBuffer(SectionId, InVertices0, BoundingBox, UpdateFlags);
-	}
-
-	template<typename VertexType1>
-	FORCEINLINE void UpdateMeshSectionSecondaryBuffer(int32 SectionId, TArray<VertexType1>& InVertices1, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionSecondaryBuffer(SectionId, InVertices1, UpdateFlags);
-	}
-
-	template<typename VertexType2>
-	FORCEINLINE void UpdateMeshSectionTertiaryBuffer(int32 SectionId, TArray<VertexType2>& InVertices2, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionTertiaryBuffer(SectionId, InVertices2, UpdateFlags);
-	}
-
-	template<typename IndexType>
-	FORCEINLINE void UpdateMeshSectionTriangles(int32 SectionId, TArray<IndexType>& InTriangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionTriangles(SectionId, InTriangles, UpdateFlags);
-	}
-
-
-
-	FORCEINLINE void CreateMeshSection(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, bool bCreateCollision = false,
-	EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSection(SectionId, MeshData, bCreateCollision, UpdateFrequency, UpdateFlags);
-	}
-
-	FORCEINLINE void CreateMeshSectionByMove(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, bool bCreateCollision = false,
-	EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSectionByMove(SectionId, MeshData, bCreateCollision, UpdateFrequency, UpdateFlags);
-	}
-
-	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
-	void CreateMeshSectionFromBuilder(int32 SectionId, URuntimeBlueprintMeshBuilder* MeshData, bool bCreateCollision = false,
-		EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average/*, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None*/)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSectionFromBuilder(SectionId, MeshData, bCreateCollision, UpdateFrequency/*, UpdateFlags*/);
-	}
-
-
-
-	FORCEINLINE void UpdateMeshSection(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionId, MeshData, UpdateFlags);
-	}
-
-	FORCEINLINE void UpdateMeshSectionByMove(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionByMove(SectionId, MeshData, UpdateFlags);
-	}
-
-	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
-	void UpdateMeshSectionFromBuilder(int32 SectionId, URuntimeBlueprintMeshBuilder* MeshData/*, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None*/)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionFromBuilder(SectionId, MeshData/*, UpdateFlags*/);
-	}
+		/*
+		Update a mesh section using a RuntimeMeshBuilder
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the section doesn't exist or vertex length is 0
+		*/
+		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
+		void UpdateMeshSectionFromBuilder(int32 SectionId, URuntimeBlueprintMeshBuilder* MeshData/*, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None*/)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionFromBuilder(SectionId, MeshData/*, UpdateFlags*/);
+		}
 
 	
-	TUniquePtr<FRuntimeMeshScopedUpdater> BeginSectionUpdate(int32 SectionId, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		check(IsInGameThread());
-		return GetOrCreateRuntimeMesh()->BeginSectionUpdate(SectionId, UpdateFlags);
-	}
+		TUniquePtr<FRuntimeMeshScopedUpdater> BeginSectionUpdate(int32 SectionId, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			check(IsInGameThread());
+			return GetOrCreateRuntimeMesh()->BeginSectionUpdate(SectionId, UpdateFlags);
+		}
 
-	TUniquePtr<FRuntimeMeshScopedUpdater> GetSectionReadonly(int32 SectionId)
-	{
-		check(IsInGameThread());
-		return GetOrCreateRuntimeMesh()->GetSectionReadonly(SectionId);
-	}
+		TUniquePtr<FRuntimeMeshScopedUpdater> GetSectionReadonly(int32 SectionId)
+		{
+			check(IsInGameThread());
+			return GetOrCreateRuntimeMesh()->GetSectionReadonly(SectionId);
+		}
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//Create mesh section (Raw mesh data) --------------------------------------------------------------------------------------------------------------------------------
 
-	
-	FORCEINLINE void CreateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
-	const TArray<FVector2D>& UV0, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, bool bCreateCollision = false,
-		EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None,
-		bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSection(SectionIndex, Vertices, Triangles, Normals, UV0, Colors, Tangents, bCreateCollision,
-			UpdateFrequency, UpdateFlags, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
-	}
+		/*
+		Creates or updates a mesh section, using the specified vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the vertex length is 0
+		*/
+		FORCEINLINE void CreateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+		const TArray<FVector2D>& UV0, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, bool bCreateCollision = false,
+			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None,
+			bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSection(SectionIndex, Vertices, Triangles, Normals, UV0, Colors, Tangents, bCreateCollision,
+				UpdateFrequency, UpdateFlags, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
+		}
 
-	FORCEINLINE void CreateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
-	const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents,
-		bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None,
-		bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSection(SectionIndex, Vertices, Triangles, Normals, UV0, UV1, Colors, Tangents, bCreateCollision,
-			UpdateFrequency, UpdateFlags, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
-	}
-
-
-	FORCEINLINE void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0,
-	const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionIndex, Vertices, Normals, UV0, Colors, Tangents, UpdateFlags);
-	}
-
-	FORCEINLINE void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0,
-	const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionIndex, Vertices, Normals, UV0, UV1, Colors, Tangents, UpdateFlags);
-	}
-
-	FORCEINLINE void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
-		const TArray<FVector2D>& UV0, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionIndex, Vertices, Triangles, Normals, UV0, Colors, Tangents, UpdateFlags);
-	}
-
-	FORCEINLINE void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
-	const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionIndex, Vertices, Triangles, Normals, UV0, UV1, Colors, Tangents, UpdateFlags);
-	}
+		/*
+		Creates or updates a mesh section, using the specified vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the vertex length is 0
+		*/
+		FORCEINLINE void CreateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+		const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents,
+			bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None,
+			bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSection(SectionIndex, Vertices, Triangles, Normals, UV0, UV1, Colors, Tangents, bCreateCollision,
+				UpdateFrequency, UpdateFlags, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
+		}
 
 
+	// Update Mesh Section (Raw mesh data) ----------------------------------------------------------------
 
-	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Create Mesh Section", AutoCreateRefTerm = "Normals,Tangents,UV0,UV1,Colors"))
-	void CreateMeshSection_Blueprint(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
-		const TArray<FRuntimeMeshTangent>& Tangents, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FLinearColor>& Colors,
-		bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false,
-		EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSection_Blueprint(SectionIndex, Vertices, Triangles, Normals, Tangents, UV0, UV1, Colors, bCreateCollision,
-			bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
-	}
+		/*
+		Updates a mesh section, using the specified vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the section doesn't exist or the vertex length is 0
+		*/
+		FORCEINLINE void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0,
+		const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionIndex, Vertices, Normals, UV0, Colors, Tangents, UpdateFlags);
+		}
 
-	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Update Mesh Section", AutoCreateRefTerm = "Triangles,Normals,Tangents,UV0,UV1,Colors"))
-	void UpdateMeshSection_Blueprint(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
-		const TArray<FRuntimeMeshTangent>& Tangents, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FLinearColor>& Colors,
-		bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSection_Blueprint(SectionIndex, Vertices, Triangles, Normals, Tangents, UV0, UV1, Colors, bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles);
-	}
+		/*
+		Updates a mesh section, using the specified vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the section doesn't exist or the vertex length is 0
+		*/
+		FORCEINLINE void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0,
+		const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionIndex, Vertices, Normals, UV0, UV1, Colors, Tangents, UpdateFlags);
+		}
 
-	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Create Mesh Section Packed", AutoCreateRefTerm = "Normals,Tangents,UV0,UV1,Colors"))
-	void CreateMeshSectionPacked_Blueprint(int32 SectionIndex, const TArray<FRuntimeMeshBlueprintVertexSimple>& Vertices, const TArray<int32>& Triangles,
-		bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average,
-		bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
-	{
-		GetOrCreateRuntimeMesh()->CreateMeshSectionPacked_Blueprint(SectionIndex, Vertices, Triangles, bCreateCollision, bCalculateNormalTangent, bShouldCreateHardTangents,
-			bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
-	}
+		/*
+		Updates a mesh section, using the specified vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the section doesn't exist or the vertex length is 0
+		*/
+		FORCEINLINE void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+			const TArray<FVector2D>& UV0, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionIndex, Vertices, Triangles, Normals, UV0, Colors, Tangents, UpdateFlags);
+		}
 
-	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Update Mesh Section Packed", AutoCreateRefTerm = "Triangles,Normals,Tangents,UV0,UV1,Colors"))
-	void UpdateMeshSectionPacked_Blueprint(int32 SectionIndex, const TArray<FRuntimeMeshBlueprintVertexSimple>& Vertices, const TArray<int32>& Triangles,
-		bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false)
-	{
-		GetOrCreateRuntimeMesh()->UpdateMeshSectionPacked_Blueprint(SectionIndex, Vertices, Triangles, bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles);
-	}
+		/*
+		Updates a mesh section, using the specified vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the section doesn't exist or the vertex length is 0
+		*/
+		FORCEINLINE void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+		const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSection(SectionIndex, Vertices, Triangles, Normals, UV0, UV1, Colors, Tangents, UpdateFlags);
+		}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Create / Update (Blueprint)
+
+		/*
+		Creates or updates a mesh section, using the specified vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the vertex length is 0
+		*/
+		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Create Mesh Section", AutoCreateRefTerm = "Normals,Tangents,UV0,UV1,Colors"))
+		void CreateMeshSection_Blueprint(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+			const TArray<FRuntimeMeshTangent>& Tangents, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FLinearColor>& Colors,
+			bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false,
+			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSection_Blueprint(SectionIndex, Vertices, Triangles, Normals, Tangents, UV0, UV1, Colors, bCreateCollision,
+				bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
+		}
+
+		/*
+		Updates a mesh section, using the specified vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the section doesn't exist or the vertex length is 0
+		*/
+		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Update Mesh Section", AutoCreateRefTerm = "Triangles,Normals,Tangents,UV0,UV1,Colors"))
+		void UpdateMeshSection_Blueprint(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+			const TArray<FRuntimeMeshTangent>& Tangents, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FLinearColor>& Colors,
+			bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSection_Blueprint(SectionIndex, Vertices, Triangles, Normals, Tangents, UV0, UV1, Colors, bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles);
+		}
+
+		/*
+		Creates or updates a mesh section, using the specified vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the vertex length is 0
+		*/
+		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Create Mesh Section Packed", AutoCreateRefTerm = "Normals,Tangents,UV0,UV1,Colors"))
+		void CreateMeshSectionPacked_Blueprint(int32 SectionIndex, const TArray<FRuntimeMeshBlueprintVertexSimple>& Vertices, const TArray<int32>& Triangles,
+			bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average,
+			bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
+		{
+			GetOrCreateRuntimeMesh()->CreateMeshSectionPacked_Blueprint(SectionIndex, Vertices, Triangles, bCreateCollision, bCalculateNormalTangent, bShouldCreateHardTangents,
+				bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
+		}
+
+		/*
+		Updates a mesh section, using the specified vertices
+		Prefer using UpdateMeshSection when setting new values on the mesh section to avoid unnecessary computations
+		Will cause a crash if the section doesn't exist or the vertex length is 0
+		*/
+		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Update Mesh Section Packed", AutoCreateRefTerm = "Triangles,Normals,Tangents,UV0,UV1,Colors"))
+		void UpdateMeshSectionPacked_Blueprint(int32 SectionIndex, const TArray<FRuntimeMeshBlueprintVertexSimple>& Vertices, const TArray<int32>& Triangles,
+			bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false)
+		{
+			GetOrCreateRuntimeMesh()->UpdateMeshSectionPacked_Blueprint(SectionIndex, Vertices, Triangles, bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles);
+		}
 
 	
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Properties of the Runtime Mesh --------------------------------------------------------------------------------------------------------------------------------
 
 
-	/** Clear a section of the procedural mesh. */
+	/** Clear a section of the runtime mesh. */
 	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
 	void ClearMeshSection(int32 SectionIndex)
 	{
@@ -444,7 +682,7 @@ public:
 	}
 
 
-
+	/** Set the material on a section of the runtime mesh */
 	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
 	void SetSectionMaterial(int32 SectionId, UMaterialInterface* Material)
 	{
@@ -454,6 +692,7 @@ public:
 		}
 	}
 
+	/** Returns the material present on the runtime mesh section */
 	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
 	UMaterialInterface* GetSectionMaterial(int32 SectionId)
 	{
