@@ -693,7 +693,9 @@ void URuntimeMeshLibrary::GetStaticMeshSection(UStaticMesh* InMesh, int32 LODInd
 
 					for (uint32 Index = 0; Index < NumIndices; Index++)
 					{
-						AdjacencyIndexCreator(MeshToSectionVertMap[AdjacencyIndices[Index]]);
+						if (MeshToSectionVertMap.Contains(AdjacencyIndices[Index])) {
+							AdjacencyIndexCreator(MeshToSectionVertMap[AdjacencyIndices[Index]]);
+						}
 					}
 				}
 			}
