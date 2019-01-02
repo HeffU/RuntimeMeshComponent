@@ -10,7 +10,7 @@
  * Using a single struct makes everything nicer
  */
 template<typename VertexType, typename TriangleType>
-struct RUNTIMEMESHCOMPONENT_API FMeshData
+struct RUNTIMEMESHCOMPONENT_API FRuntimeMeshData
 {
 	TArray<VertexType> Vertices;
 	TArray<TriangleType> Triangles;
@@ -33,7 +33,7 @@ struct RUNTIMEMESHCOMPONENT_API FMeshData
 };
 
 template<typename Datastruct, typename VertexType, typename TriangleType>
-class RUNTIMEMESHCOMPONENT_API MeshManager
+class RUNTIMEMESHCOMPONENT_API FRuntimeMeshManager
 {
 private:
 
