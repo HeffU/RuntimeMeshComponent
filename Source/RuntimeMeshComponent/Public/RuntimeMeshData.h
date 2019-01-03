@@ -132,9 +132,9 @@ public:
 
 	void SetLODScreenSize(int32 LODIndex, float MinScreenSize);
 
-
+	/* TODO LOD support */
 	void CreateMeshSection(int32 SectionIndex, bool bWantsHighPrecisionTangents, bool bWantsHighPrecisionUVs, int32 NumUVs, bool bWants32BitIndices, bool bCreateCollision, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average);
-	
+	/* TODO LOD support */
 	template<typename VertexType0, typename IndexType>
 	void CreateMeshSection(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles, bool bCreateCollision = false,
 		EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -171,7 +171,7 @@ public:
 		
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename IndexType>
 	void CreateMeshSection(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles, const FBox& BoundingBox,
 		bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -208,7 +208,7 @@ public:
 
 		Mesh->Commit(BoundingBox);
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1, typename IndexType>
 	void CreateMeshSectionDualBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<IndexType>& InTriangles, bool bCreateCollision = false,
 		EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -245,7 +245,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1, typename IndexType>
 	void CreateMeshSectionDualBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<IndexType>& InTriangles, const FBox& BoundingBox,
 		bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -282,7 +282,7 @@ public:
 
 		Mesh->Commit(BoundingBox);
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
 	void CreateMeshSectionTripleBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2, TArray<IndexType>& InTriangles,
 		bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -319,7 +319,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
 	void CreateMeshSectionTripleBuffer(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2, TArray<IndexType>& InTriangles,
 		const FBox& BoundingBox, bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -358,7 +358,7 @@ public:
 	}
 
 
-
+	/* TODO LOD support */
 	template<typename VertexType0>
 	void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
 	{
@@ -380,7 +380,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0>
 	void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
 	{
@@ -403,7 +403,7 @@ public:
 
 		Mesh->Commit(BoundingBox);
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename IndexType>
 	void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
 	{
@@ -432,7 +432,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename IndexType>
 	void UpdateMeshSection(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles,
 		const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -463,7 +463,7 @@ public:
 
 		Mesh->Commit(BoundingBox);
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1>
 	void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1,
 		ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -490,7 +490,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1>
 	void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1,
 		const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -518,7 +518,7 @@ public:
 
 		Mesh->Commit(BoundingBox);
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1, typename IndexType>
 	void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1,
 		TArray<IndexType>& InTriangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -552,7 +552,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1, typename IndexType>
 	void UpdateMeshSectionDualBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<IndexType>& InTriangles,
 		const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -587,7 +587,7 @@ public:
 
 		Mesh->Commit(BoundingBox);
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1, typename VertexType2>
 	void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
 		ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -618,7 +618,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1, typename VertexType2>
 	void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
 		const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -650,7 +650,7 @@ public:
 
 		Mesh->Commit(BoundingBox);
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
 	void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
 		TArray<IndexType>& InTriangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -688,7 +688,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0, typename VertexType1, typename VertexType2, typename IndexType>
 	void UpdateMeshSectionTripleBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, TArray<VertexType1>& InVertices1, TArray<VertexType2>& InVertices2,
 		TArray<IndexType>& InTriangles, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
@@ -729,7 +729,7 @@ public:
 	}
 	
 
-
+	/* TODO LOD support */
 	template<typename VertexType0>
 	void UpdateMeshSectionPrimaryBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
 	{
@@ -751,7 +751,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType0>
 	void UpdateMeshSectionPrimaryBuffer(int32 SectionId, TArray<VertexType0>& InVertices0, const FBox& BoundingBox, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
 	{
@@ -774,7 +774,7 @@ public:
 
 		Mesh->Commit(BoundingBox);
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType1>
 	void UpdateMeshSectionSecondaryBuffer(int32 SectionId, TArray<VertexType1>& InVertices1, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
 	{
@@ -796,7 +796,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename VertexType2>
 	void UpdateMeshSectionTertiaryBuffer(int32 SectionId, TArray<VertexType2>& InVertices2, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
 	{
@@ -818,7 +818,7 @@ public:
 
 		Mesh->Commit();
 	}
-
+	/* TODO LOD support */
 	template<typename IndexType>
 	void UpdateMeshSectionTriangles(int32 SectionId, TArray<IndexType>& InTriangles, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
 	{
@@ -841,10 +841,10 @@ public:
 	}
 
 
-
+	/* TODO LOD support */
 	void CreateMeshSection(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, bool bCreateCollision = false,
 		EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None);
-
+	/* TODO LOD support */
 	void CreateMeshSectionByMove(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, bool bCreateCollision = false,
 		EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None);
 
@@ -882,27 +882,27 @@ private:
 		const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, TFunction<FColor(int32 Index)> ColorAccessor, int32 NumColors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags);
 
 public:
-
+	/* TODO LOD support */
 	void CreateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
 		const TArray<FVector2D>& UV0, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, bool bCreateCollision = false,
 		EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None,
 		bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true);
-
+	/* TODO LOD support */
 	void CreateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
 		const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents,
 		bool bCreateCollision = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None,
 		bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true);
 
-
+	/* TODO LOD support */
 	void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0,
 		const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None);
-
+	/* TODO LOD support */
 	void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0,
 		const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None);
-
+	/* TODO LOD support */
 	void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
 		const TArray<FVector2D>& UV0, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None);
-
+	/* TODO LOD support */
 	void UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
 		const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None);
 
@@ -929,7 +929,7 @@ public:
 
 
 	
-
+	/* TODO LOD support */
 	template<typename IndexType>
 	void SetSectionTessellationTriangles(int32 SectionId, const TArray<IndexType>& Triangles)
 	{
