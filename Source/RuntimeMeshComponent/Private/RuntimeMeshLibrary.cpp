@@ -352,7 +352,7 @@ void URuntimeMeshLibrary::CopyStaticMeshToRuntimeMesh(UStaticMeshComponent* Stat
 	{
 		UStaticMesh* StaticMesh = StaticMeshComponent->GetStaticMesh();
 
-		RuntimeMesh->ClearAllMeshSections();
+		RuntimeMesh->GetRuntimeMeshData()->ClearAllMeshSections();
 
 		//// MESH DATA
 
@@ -375,8 +375,8 @@ void URuntimeMeshLibrary::CopyStaticMeshToRuntimeMesh(UStaticMeshComponent* Stat
 			GetStaticMeshSection(StaticMesh, LODIndex, SectionIndex, MeshData, AdjacencyTrianglesAccessor);
 
 			// Create RuntimeMesh
-			RuntimeMesh->CreateMeshSection(SectionIndex, MeshData, bCreateCollision);
-			RuntimeMesh->SetSectionTessellationTriangles(SectionIndex, AdjacencyTriangles);
+			RuntimeMesh->GetRuntimeMeshData()->CreateMeshSection(SectionIndex, MeshData, bCreateCollision);
+			RuntimeMesh->GetRuntimeMeshData()->SetSectionTessellationTriangles(SectionIndex, AdjacencyTriangles);
 		}
 
 		//// SIMPLE COLLISION
@@ -401,7 +401,7 @@ void URuntimeMeshLibrary::CopyStaticMeshToRuntimeMeshComponent(UStaticMeshCompon
 void URuntimeMeshLibrary::CopyCollisionFromStaticMesh(UStaticMesh* StaticMesh, URuntimeMesh* RuntimeMesh)
 {
 	// Clear any existing collision hulls
-	RuntimeMesh->ClearAllConvexCollisionSections();
+	RuntimeMesh->GetRuntimeMeshData()->ClearConvexCollisionSections();
 
 	if (StaticMesh->BodySetup != nullptr)
 	{
@@ -412,7 +412,7 @@ void URuntimeMeshLibrary::CopyCollisionFromStaticMesh(UStaticMesh* StaticMesh, U
 			// Copy convex verts
 			FKConvexElem& MeshConvex = StaticMesh->BodySetup->AggGeom.ConvexElems[ConvexIndex];
 
-			RuntimeMesh->AddConvexCollisionSection(MeshConvex.VertexData);
+			RuntimeMesh->GetRuntimeMeshData()->AddConvexCollisionSection(MeshConvex.VertexData);
 		}
 	}
 }

@@ -14,12 +14,12 @@ FRuntimeMeshComponentSceneProxy::FRuntimeMeshComponentSceneProxy(URuntimeMeshCom
 
 	check(Component->GetRuntimeMesh() != nullptr);
 
-	RuntimeMeshProxy = Component->GetRuntimeMesh()->EnsureProxyCreated(GetScene().GetFeatureLevel());
+	RuntimeMeshProxy = Component->GetRuntimeMeshData()->EnsureProxyCreated(GetScene().GetFeatureLevel());
 
 	// Setup our material map
 
 
-	for (auto SectionId : Component->GetRuntimeMesh()->GetSectionIds())
+	for (auto SectionId : Component->GetRuntimeMeshData()->GetSectionIds())
 	{
 		UMaterialInterface* Mat = Component->GetMaterial(SectionId);
 		if (Mat == nullptr)

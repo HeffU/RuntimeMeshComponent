@@ -113,7 +113,7 @@ FBoxSphereBounds URuntimeMeshComponent::CalcBounds(const FTransform& LocalToWorl
 {
 	if (GetRuntimeMesh())
 	{
-		return GetRuntimeMesh()->GetLocalBounds().TransformBy(LocalToWorld);
+		return GetRuntimeMesh()->GetRuntimeMeshData()->GetLocalBounds().TransformBy(LocalToWorld);
 	}
 
 	return FBoxSphereBounds(FSphere(FVector::ZeroVector, 1));
@@ -142,7 +142,7 @@ UBodySetup* URuntimeMeshComponent::GetBodySetup()
 
 int32 URuntimeMeshComponent::GetNumMaterials() const
 {
-	int32 RuntimeMeshSections = GetRuntimeMesh() != nullptr ? GetRuntimeMesh()->GetNumSections() : 0;
+	int32 RuntimeMeshSections = GetRuntimeMesh() != nullptr ? GetRuntimeMesh()->GetRuntimeMeshData()->GetNumSections() : 0;
 
 	return FMath::Max(Super::GetNumMaterials(), RuntimeMeshSections);
 }

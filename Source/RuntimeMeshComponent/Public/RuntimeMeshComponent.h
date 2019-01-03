@@ -48,14 +48,12 @@ public:
 		return RuntimeMeshReference;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
-		FORCEINLINE FRuntimeMeshDataRef GetRuntimeMeshData()
+	FORCEINLINE FRuntimeMeshDataRef GetRuntimeMeshData()
 	{
 		return GetRuntimeMesh() ? GetRuntimeMesh()->GetRuntimeMeshData() : FRuntimeMeshDataRef();
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
-		FORCEINLINE FRuntimeMeshDataRef GetOrCreateRuntimeMeshData()
+	FORCEINLINE FRuntimeMeshDataRef GetOrCreateRuntimeMeshData()
 	{
 		return GetOrCreateRuntimeMesh()->GetRuntimeMeshData();
 	}
@@ -100,6 +98,7 @@ public:
 		void SetMeshSection(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles, bool bCreateCollision = false,
 			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None) 
 		{
+			check(IsInGameThread())
 			if (GetOrCreateRuntimeMeshData()->DoesSectionExist(SectionIndex)) {
 				if (InVertices0.Num() == 0) {
 					GetOrCreateRuntimeMeshData()->ClearMeshSection(SectionIndex);
@@ -120,6 +119,7 @@ public:
 		void SetMeshSection(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, bool bCreateCollision = false,
 			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
 		{
+			check(IsInGameThread())
 			if (GetOrCreateRuntimeMeshData()->DoesSectionExist(SectionId)) {
 				if (MeshData->NumIndices() == 0) {
 					GetOrCreateRuntimeMeshData()->ClearMeshSection(SectionId);
@@ -142,6 +142,7 @@ public:
 			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None,
 			bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
 		{
+			check(IsInGameThread())
 			if (GetOrCreateRuntimeMeshData()->DoesSectionExist(SectionIndex)) {
 				if (Vertices.Num() == 0) {
 					GetOrCreateRuntimeMeshData()->ClearMeshSection(SectionIndex);
@@ -166,6 +167,7 @@ public:
 				bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false,
 				EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
 		{
+			check(IsInGameThread())
 			if (GetOrCreateRuntimeMeshData()->DoesSectionExist(SectionIndex)) {
 				if (Vertices.Num() == 0) {
 					GetOrCreateRuntimeMeshData()->ClearMeshSection(SectionIndex);
@@ -190,6 +192,7 @@ public:
 				bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average,
 				bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
 		{
+			check(IsInGameThread())
 			if (GetOrCreateRuntimeMeshData()->DoesSectionExist(SectionIndex)) {
 				if (Vertices.Num() == 0) {
 					GetOrCreateRuntimeMeshData()->ClearMeshSection(SectionIndex);

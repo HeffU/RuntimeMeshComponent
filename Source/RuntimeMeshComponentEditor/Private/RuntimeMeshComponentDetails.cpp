@@ -402,12 +402,12 @@ FReply FRuntimeMeshComponentDetails::ClickedOnConvertToStaticMesh()
 			bool bUseHighPrecisionTangents = false;
 			bool bUseFullPrecisionUVs = false;
 
-			const int32 NumSections = RuntimeMeshComp->GetNumSections();
+			const int32 NumSections = RuntimeMeshComp->GetRuntimeMeshData()->GetNumSections();
 			int32 VertexBase = 0;
 			int32 MaxUVs = 0;
 			for (int32 SectionIdx = 0; SectionIdx < NumSections; SectionIdx++)
 			{
-				auto MeshData = RuntimeMeshComp->GetSectionReadonly(SectionIdx);
+				auto MeshData = RuntimeMeshComp->GetRuntimeMeshData()->GetSectionReadonly(SectionIdx);
 				check(MeshData.IsValid());
 
 				int32 NumUVs = MeshData->NumUVChannels();
@@ -451,7 +451,7 @@ FReply FRuntimeMeshComponentDetails::ClickedOnConvertToStaticMesh()
 				}
 
 				// Find a material index for this section.
-				UMaterialInterface* Material = RuntimeMeshComp->GetSectionMaterial(SectionIdx);
+				UMaterialInterface* Material = RuntimeMeshComp->GetOrCreateRuntimeMesh()->GetSectionMaterial(SectionIdx);
 				int32 MaterialIndex = Materials.AddUnique(FStaticMaterial(Material));
 
 				// copy face info

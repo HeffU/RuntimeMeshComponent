@@ -1097,8 +1097,10 @@ private:
 	/** Update LocalBounds member from the local box of each section */
 	void UpdateLocalBounds();
 
+public:
 	FRuntimeMeshProxyPtr EnsureProxyCreated(ERHIFeatureLevel::Type InFeatureLevel);
 	
+private:
 	TSharedPtr<const FRuntimeMeshAccessor> GetReadonlyMeshAccessor(int32 SectionId);
 
 	void Initialize();
