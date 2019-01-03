@@ -10,20 +10,20 @@
  * Using a single struct makes everything nicer
  */
 template<typename VertexType, typename TriangleType>
-struct RUNTIMEMESHCOMPONENT_API FRuntimeMeshData
+struct RUNTIMEMESHCOMPONENT_API FRuntimeMeshDataStruct
 {
 	TArray<VertexType> Vertices;
 	TArray<TriangleType> Triangles;
 
-	FMeshData() {}
+	FRuntimeMeshDataStruct() {}
 
-	FMeshData(TArray<VertexType> InVertices, TArray<TriangleType> InTriangles) {
+	FRuntimeMeshDataStruct(TArray<VertexType> InVertices, TArray<TriangleType> InTriangles) {
 		Vertices = InVertices;
 		Triangles = InTriangles;
 	}
 
-	FMeshData<VertexType, TriangleType> FlipNormals() {
-		FMeshData<VertexType, TriangleType> newmesh = FMeshData(Vertices, Triangles);
+	FRuntimeMeshDataStruct<VertexType, TriangleType> FlipNormals() {
+		FRuntimeMeshDataStruct<VertexType, TriangleType> newmesh = FRuntimeMeshDataStruct(Vertices, Triangles);
 		for (int32 i = 0; i < Triangles.Num(); i += 3) {
 			newmesh.Triangles[i] = Triangles[i + 1];
 			newmesh.Triangles[i + 1] = Triangles[i];
@@ -37,9 +37,9 @@ class RUNTIMEMESHCOMPONENT_API FRuntimeMeshManager
 {
 private:
 
-	typedef FMeshData<VertexType, TriangleType> MeshType;
+	typedef FRuntimeMeshDataStruct<VertexType, TriangleType> MeshType;
 
-	FMeshData<VertexType, TriangleType> Mesh;
+	FRuntimeMeshDataStruct<VertexType, TriangleType> Mesh;
 
 	TArray<Datastruct> DataMap;
 
