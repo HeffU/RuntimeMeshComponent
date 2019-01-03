@@ -1564,7 +1564,7 @@ int32 FRuntimeMeshData::GetSectionFromCollisionFaceIndex(int32 FaceIndex) const
 * Gets the section ID from the given face index reference,
 * The face index reference then gets set to it's face index in the section.
 */
-int32 FRuntimeMeshData::GetSectionAndFaceIndexFromCollisionFaceIndex(int32& FaceIndex) const
+int32 FRuntimeMeshData::GetSectionAndFaceFromCollisionFaceIndex(int32& FaceIndex) const
 {
 	SCOPE_CYCLE_COUNTER(STAT_RuntimeMesh_GetSectionFromCollisionFaceIndex);
 
@@ -1581,7 +1581,7 @@ int32 FRuntimeMeshData::GetSectionAndFaceIndexFromCollisionFaceIndex(int32& Face
 
 		if (Section.IsValid() && Section->IsCollisionEnabled())
 		{
-			int32 NumFaces = Section->GetNumIndices() / 3;
+			int32 NumFaces = Section->GetNumIndices(0) / 3;
 
 			if (FaceIndex < TotalFaceCount + NumFaces)
 			{

@@ -4,26 +4,30 @@
 
 #include "CoreMinimal.h"
 
-#include "RuntimeMeshGenericVertex.h"
-
 /**
  * Using a single struct makes everything nicer
+ * If you already have something similar in your project, you can use an operator to convert it in place when you use the mesh manager :
+ *	operator FRuntimeMeshDataStruct<FVertexNoxel, int32>() {
+ *		return FRuntimeMeshDataStruct<FVertexNoxel, int32>(Vertices, Triangles);
+ *	}
+ * (put this in your struct)
+ * or you could even directly inherit from this one
  */
 template<typename VertexType, typename TriangleType>
-struct RUNTIMEMESHCOMPONENT_API FRuntimeMeshData
+struct /*RUNTIMEMESHCOMPONENT_API*/ FRuntimeMeshDataStruct //Do not uncomment the API, otherwise you'll get unresolved externals
 {
 	TArray<VertexType> Vertices;
 	TArray<TriangleType> Triangles;
 
-	FMeshData() {}
+	FRuntimeMeshDataStruct() {}
 
-	FMeshData(TArray<VertexType> InVertices, TArray<TriangleType> InTriangles) {
+	FRuntimeMeshDataStruct(TArray<VertexType> InVertices, TArray<TriangleType> InTriangles) {
 		Vertices = InVertices;
 		Triangles = InTriangles;
 	}
 
-	FMeshData<VertexType, TriangleType> FlipNormals() {
-		FMeshData<VertexType, TriangleType> newmesh = FMeshData(Vertices, Triangles);
+	FRuntimeMeshDataStruct<VertexType, TriangleType> FlipNormals() {
+		FRuntimeMeshDataStruct<VertexType, TriangleType> newmesh = FRuntimeMeshDataStruct(Vertices, Triangles);
 		for (int32 i = 0; i < Triangles.Num(); i += 3) {
 			newmesh.Triangles[i] = Triangles[i + 1];
 			newmesh.Triangles[i + 1] = Triangles[i];
@@ -33,13 +37,13 @@ struct RUNTIMEMESHCOMPONENT_API FRuntimeMeshData
 };
 
 template<typename Datastruct, typename VertexType, typename TriangleType>
-class RUNTIMEMESHCOMPONENT_API FRuntimeMeshManager
+class /*RUNTIMEMESHCOMPONENT_API*/ FRuntimeMeshManager
 {
 private:
 
-	typedef FMeshData<VertexType, TriangleType> MeshType;
+	typedef FRuntimeMeshDataStruct<VertexType, TriangleType> MeshType;
 
-	FMeshData<VertexType, TriangleType> Mesh;
+	FRuntimeMeshDataStruct<VertexType, TriangleType> Mesh;
 
 	TArray<Datastruct> DataMap;
 

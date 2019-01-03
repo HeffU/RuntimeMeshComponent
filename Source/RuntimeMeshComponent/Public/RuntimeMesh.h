@@ -277,7 +277,7 @@ public:
 	int32 GetSectionIdFromCollisionFaceIndex(int32 FaceIndex) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
-	void GetSectionIdAndFaceIndexFromCollisionFaceIndex(int32 FaceIndex, int32& SectionIndex, int32& SectionFaceIndex) const;
+	void GetSectionIdAndFaceIdFromCollisionFaceIndex(int32 FaceIndex, int32& SectionIndex, int32& SectionFaceIndex) const;
 
 
 private:

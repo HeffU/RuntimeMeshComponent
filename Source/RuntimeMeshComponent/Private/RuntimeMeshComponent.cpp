@@ -192,6 +192,14 @@ int32 URuntimeMeshComponent::GetSectionIdFromCollisionFaceIndex(int32 FaceIndex)
 	return SectionIndex;
 }
 
+void URuntimeMeshComponent::GetSectionIdAndFaceIdFromCollisionFaceIndex(int32 FaceIndex, int32 & SectionIndex, int32 & SectionFaceIndex) const
+{
+	if (URuntimeMesh* Mesh = GetRuntimeMesh())
+	{
+		Mesh->GetSectionIdAndFaceIdFromCollisionFaceIndex(FaceIndex, SectionIndex, SectionFaceIndex);
+	}
+}
+
 UMaterialInterface* URuntimeMeshComponent::GetMaterialFromCollisionFaceIndex(int32 FaceIndex, int32& SectionIndex) const
 {
 	UMaterialInterface* Result = nullptr;

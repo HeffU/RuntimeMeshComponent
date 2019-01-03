@@ -229,6 +229,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
 	int32 GetSectionIdFromCollisionFaceIndex(int32 FaceIndex) const;
 
+	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
+	void GetSectionIdAndFaceIdFromCollisionFaceIndex(int32 FaceIndex, int32& SectionIndex, int32& SectionFaceIndex) const;
+
 	virtual UMaterialInterface* GetMaterialFromCollisionFaceIndex(int32 FaceIndex, int32& SectionIndex) const override;
 	//~ End UPrimitiveComponent Interface.
 

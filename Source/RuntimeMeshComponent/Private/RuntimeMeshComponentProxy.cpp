@@ -82,7 +82,7 @@ void FRuntimeMeshComponentSceneProxy::CreateMeshBatch(FMeshBatch& MeshBatch, con
 	Section->GetLOD(LODIndex)->CreateMeshBatch(MeshBatch, Section->CastsShadow(), bWantsAdjacency);
 
 	MeshBatch.LODIndex = LODIndex;
-#if !(UE_BUILD_SHIPPING || UE_BUILD_TEXT)
+#if !(UE_BUILD_SHIPPING /*|| UE_BUILD_TEXT*/)
 	MeshBatch.VisualizeLODIndex = LODIndex;
 #endif
 
