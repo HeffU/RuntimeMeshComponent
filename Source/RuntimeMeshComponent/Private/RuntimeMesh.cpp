@@ -147,10 +147,10 @@ int32 URuntimeMesh::GetSectionIdFromCollisionFaceIndex(int32 FaceIndex) const
 	return GetRuntimeMeshData()->GetSectionFromCollisionFaceIndex(FaceIndex);
 }
 
-void URuntimeMesh::GetSectionIdAndFaceIndexFromCollisionFaceIndex(int32 FaceIndex, int32 & SectionIndex, int32 & SectionFaceIndex) const
+void URuntimeMesh::GetSectionIdAndFaceIdFromCollisionFaceIndex(int32 FaceIndex, int32 & SectionIndex, int32 & SectionFaceIndex) const
 {
 	SectionFaceIndex = FaceIndex;
-	SectionIndex = GetRuntimeMeshData()->GetSectionAndFaceIndexFromCollisionFaceIndex(SectionFaceIndex);
+	SectionIndex = GetRuntimeMeshData()->GetSectionAndFaceFromCollisionFaceIndex(SectionFaceIndex);
 }
 
 void URuntimeMesh::MarkCollisionDirty()
