@@ -4,13 +4,17 @@
 
 #include "CoreMinimal.h"
 
-#include "RuntimeMeshGenericVertex.h"
-
 /**
  * Using a single struct makes everything nicer
+ * If you already have something similar in your project, you can use an operator to convert it in place when you use the mesh manager :
+ *	operator FRuntimeMeshDataStruct<FVertexNoxel, int32>() {
+ *		return FRuntimeMeshDataStruct<FVertexNoxel, int32>(Vertices, Triangles);
+ *	}
+ * (put this in your struct)
+ * or you could even directly inherit from this one
  */
 template<typename VertexType, typename TriangleType>
-struct RUNTIMEMESHCOMPONENT_API FRuntimeMeshDataStruct
+struct /*RUNTIMEMESHCOMPONENT_API*/ FRuntimeMeshDataStruct //Do not uncomment the API, otherwise you'll get unresolved externals
 {
 	TArray<VertexType> Vertices;
 	TArray<TriangleType> Triangles;
@@ -33,7 +37,7 @@ struct RUNTIMEMESHCOMPONENT_API FRuntimeMeshDataStruct
 };
 
 template<typename Datastruct, typename VertexType, typename TriangleType>
-class RUNTIMEMESHCOMPONENT_API FRuntimeMeshManager
+class /*RUNTIMEMESHCOMPONENT_API*/ FRuntimeMeshManager
 {
 private:
 
