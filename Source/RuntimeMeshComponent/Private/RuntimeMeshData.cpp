@@ -188,6 +188,17 @@ void FRuntimeMeshData::SetLODScreenSize(int32 LODIndex, float MinScreenSize)
 	//check(LODIndex == 0 || LODScreenSizes[LODIndex] < LODScreenSizes[LODIndex - 1]);
 }
 
+void FRuntimeMeshData::SetLODForCollision(int32 LODIndex)
+{
+	LODForCollision = LODIndex;
+	MarkCollisionDirty();
+}
+
+int32 FRuntimeMeshData::GetLODForCollision()
+{
+	return LODForCollision;
+}
+
 void FRuntimeMeshData::CreateMeshSection(int32 SectionIndex, bool bWantsHighPrecisionTangents, bool bWantsHighPrecisionUVs, int32 NumUVs, bool bWants32BitIndices, bool bCreateCollision, EUpdateFrequency UpdateFrequency /*= EUpdateFrequency::Average*/)
 {
 	SCOPE_CYCLE_COUNTER(STAT_RuntimeMesh_CreateMeshSection_NoData);
@@ -1388,7 +1399,7 @@ bool FRuntimeMeshData::GetPhysicsTriMeshData(struct FTriMeshCollisionData* Colli
 		if (MeshSections[SectionId].IsValid() && MeshSections[SectionId]->IsCollisionEnabled())
 		{
 			TArray<FVector2D> UVs;
-			int32 NumTriangles = MeshSections[SectionId]->GetCollisionData(CollisionData->Vertices, CollisionData->Indices, UVs);
+			int32 NumTriangles = MeshSections[SectionId]->GetCollisionData(LODForCollision, CollisionData->Vertices, CollisionData->Indices, UVs);
 
 			if (bCopyUVs)
 			{
@@ -1531,34 +1542,9 @@ void FRuntimeMeshData::SendSectionPropertiesUpdate(int32 SectionIndex)
 
 int32 FRuntimeMeshData::GetSectionFromCollisionFaceIndex(int32 FaceIndex) const
 {
-	SCOPE_CYCLE_COUNTER(STAT_RuntimeMesh_GetSectionFromCollisionFaceIndex);
+	int32 FaceIdx = FaceIndex;
 
-	FRuntimeMeshScopeLock Lock(SyncRoot);
-
-	int32 SectionIndex = 0;
-
-	// Look for element that corresponds to the supplied face
-	int32 TotalFaceCount = 0;
-
-	for (int32 SectionIdx = 0; SectionIdx < MeshSections.Num(); SectionIdx++)
-	{
-		const FRuntimeMeshSectionPtr& Section = MeshSections[SectionIdx];
-
-		if (Section.IsValid() && Section->IsCollisionEnabled())
-		{
-			int32 NumFaces = Section->GetNumIndices(0) / 3;
-			TotalFaceCount += NumFaces;
-
-			if (FaceIndex < TotalFaceCount)
-			{
-				// Grab the material
-				SectionIndex = SectionIdx;
-				break;
-			}
-		}
-	}
-
-	return SectionIndex;
+	return GetSectionAndFaceFromCollisionFaceIndex(FaceIdx);
 }
 /*
 * Gets the section ID from the given face index reference,
@@ -1581,7 +1567,7 @@ int32 FRuntimeMeshData::GetSectionAndFaceFromCollisionFaceIndex(int32& FaceIndex
 
 		if (Section.IsValid() && Section->IsCollisionEnabled())
 		{
-			int32 NumFaces = Section->GetNumIndices(0) / 3;
+			int32 NumFaces = Section->GetNumIndices(LODForCollision) / 3;
 
 			if (FaceIndex < TotalFaceCount + NumFaces)
 			{

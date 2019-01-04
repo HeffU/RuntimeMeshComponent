@@ -216,60 +216,60 @@ void FRuntimeMeshSection::UpdateBoundingBox()
 	LocalBoundingBox = NewBoundingBox;
 }
 
-int32 FRuntimeMeshSection::GetCollisionData(TArray<FVector>& OutPositions, TArray<FTriIndices>& OutIndices, TArray<FVector2D>& OutUVs)
+int32 FRuntimeMeshSection::GetCollisionData(int32 LODIndex, TArray<FVector>& OutPositions, TArray<FTriIndices>& OutIndices, TArray<FVector2D>& OutUVs)
 { 
  	int32 StartVertexPosition = OutPositions.Num();
 
-	FRuntimeMeshSectionLODData& LODData = LODs[0];
+	FRuntimeMeshSectionLODData& LODData = LODs[FMath::Clamp(LODIndex, 0, LODs.Num()-1)];
 
 	OutPositions.Append(reinterpret_cast<FVector*>(LODData.PositionBuffer.GetData().GetData()), LODData.PositionBuffer.GetNumVertices());
   
  	bool bCopyUVs = UPhysicsSettings::Get()->bSupportUVFromHitResults;
  
- 	//if (bCopyUVs)
- 	//{
- 	//	TUniquePtr<FRuntimeMeshVertexStreamUVAccessor> StreamAccessor = nullptr;
+ 	/*if (bCopyUVs)
+ 	{
+ 		TUniquePtr<FRuntimeMeshVertexStreamUVAccessor> StreamAccessor = nullptr;
  
- 	//	const auto SetupStreamAccessor = [](TArray<uint8>* Data, const FRuntimeMeshVertexStreamStructureElement& Element) -> TUniquePtr<FRuntimeMeshVertexStreamUVAccessor>
- 	//	{
- 	//		if (Element.Type == VET_Float2 || Element.Type == VET_Float4)
- 	//		{
- 	//			return MakeUnique<FRuntimeMeshVertexStreamUVFullPrecisionAccessor>(Data, Element);
- 	//		}
- 	//		else
- 	//		{
- 	//			check(Element.Type == VET_Half2 || Element.Type == VET_Half4);
- 	//			return MakeUnique<FRuntimeMeshVertexStreamUVHalfPrecisionAccessor>(Data, Element);
- 	//		}
- 	//	};
+ 		const auto SetupStreamAccessor = [](TArray<uint8>* Data, const FRuntimeMeshVertexStreamStructureElement& Element) -> TUniquePtr<FRuntimeMeshVertexStreamUVAccessor>
+ 		{
+ 			if (Element.Type == VET_Float2 || Element.Type == VET_Float4)
+ 			{
+ 				return MakeUnique<FRuntimeMeshVertexStreamUVFullPrecisionAccessor>(Data, Element);
+ 			}
+ 			else
+ 			{
+ 				check(Element.Type == VET_Half2 || Element.Type == VET_Half4);
+ 				return MakeUnique<FRuntimeMeshVertexStreamUVHalfPrecisionAccessor>(Data, Element);
+ 			}
+ 		};
  
- 	//	if (VertexBuffer0.GetStructure().HasUVs())
- 	//	{
- 	//		StreamAccessor = SetupStreamAccessor(&VertexBuffer0.GetData(), VertexBuffer0.GetStructure().UVs[0]);
- 	//	}
- 	//	else if (VertexBuffer1.GetStructure().HasUVs())
- 	//	{
- 	//		StreamAccessor = SetupStreamAccessor(&VertexBuffer1.GetData(), VertexBuffer1.GetStructure().UVs[0]);
- 	//	}
- 	//	else if (VertexBuffer2.GetStructure().HasUVs())
- 	//	{
- 	//		StreamAccessor = SetupStreamAccessor(&VertexBuffer2.GetData(), VertexBuffer2.GetStructure().UVs[0]);
- 	//	}
- 	//	else
- 	//	{
- 	//		// Add blank entries since we can't get UV's for this section
- 	//		OutUVs.AddZeroed(PositionAccessor.Num());
- 	//	}
+ 		if (VertexBuffer0.GetStructure().HasUVs())
+ 		{
+ 			StreamAccessor = SetupStreamAccessor(&VertexBuffer0.GetData(), VertexBuffer0.GetStructure().UVs[0]);
+ 		}
+ 		else if (VertexBuffer1.GetStructure().HasUVs())
+ 		{
+ 			StreamAccessor = SetupStreamAccessor(&VertexBuffer1.GetData(), VertexBuffer1.GetStructure().UVs[0]);
+ 		}
+ 		else if (VertexBuffer2.GetStructure().HasUVs())
+ 		{
+ 			StreamAccessor = SetupStreamAccessor(&VertexBuffer2.GetData(), VertexBuffer2.GetStructure().UVs[0]);
+ 		}
+ 		else
+ 		{
+ 			// Add blank entries since we can't get UV's for this section
+ 			OutUVs.AddZeroed(PositionAccessor.Num());
+ 		}
  
- 	//	if (StreamAccessor.IsValid())
- 	//	{
- 	//		OutUVs.Reserve(OutUVs.Num() + StreamAccessor->Num());
- 	//		for (int32 Index = 0; Index < StreamAccessor->Num(); Index++)
- 	//		{
- 	//			OutUVs.Add(StreamAccessor->GetUV(Index));
- 	//		}
- 	//	}
- 	//}
+ 		if (StreamAccessor.IsValid())
+ 		{
+ 			OutUVs.Reserve(OutUVs.Num() + StreamAccessor->Num());
+ 			for (int32 Index = 0; Index < StreamAccessor->Num(); Index++)
+ 			{
+ 				OutUVs.Add(StreamAccessor->GetUV(Index));
+ 			}
+ 		}
+ 	}*/
  
  	TArray<uint8>& IndexData = LODData.IndexBuffer.GetData();
  

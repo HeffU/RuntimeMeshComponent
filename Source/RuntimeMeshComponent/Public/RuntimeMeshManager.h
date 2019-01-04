@@ -104,7 +104,7 @@ public:
 	FORCEINLINE void AddMesh(Datastruct id, MeshType mesh)
 	{
 		if (DataMap.Contains(id)) {
-			int32 index = DataMap.Find(id);
+			/*int32 index = DataMap.Find(id);
 			if (mesh.Vertices.Num() == VertLengths[index] && mesh.Triangles.Num() == TrisLengths[index]) {
 				//If the lengths match, update the arrays only
 				int32 VertStart, TrisStart;
@@ -115,13 +115,13 @@ public:
 				}
 				for (int i = 0; i < mesh.Triangles.Num(); i++)
 				{
-					Mesh.Triangles[i + TrisStart] = mesh.Triangles[i];
+					Mesh.Triangles[i + TrisStart] = mesh.Triangles[i] + VertStart;
 				}
 				return; //stop the execution
 			}
-			else {
+			else {*/
 				RemoveMesh(id);
-			}
+			//}
 		}
 
 		

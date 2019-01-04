@@ -60,6 +60,7 @@ DECLARE_CYCLE_STAT(TEXT("RM - Serialize Data"), STAT_RuntimeMesh_SerializationOp
  */
 class RUNTIMEMESHCOMPONENT_API FRuntimeMeshData : public TSharedFromThis<FRuntimeMeshData, ESPMode::ThreadSafe>
 {
+
 	/** Array of sections of mesh */
 	TArray<FRuntimeMeshSectionPtr> MeshSections;
 
@@ -85,8 +86,12 @@ class RUNTIMEMESHCOMPONENT_API FRuntimeMeshData : public TSharedFromThis<FRuntim
 	FRuntimeMeshProxyPtr RenderProxy;
 
 	TUniquePtr<FRuntimeMeshLockProvider> SyncRoot;
+
+	/* LOD to be used when generating the collision mesh for complex collisions */
+	int32 LODForCollision = 0;
 	
 public:
+
 	FRuntimeMeshData();
 	~FRuntimeMeshData();
 
@@ -132,6 +137,9 @@ public:
 
 	void SetLODScreenSize(int32 LODIndex, float MinScreenSize);
 
+	void SetLODForCollision(int32 LODIndex);
+
+	int32 GetLODForCollision();
 
 	void CreateMeshSection(int32 SectionIndex, bool bWantsHighPrecisionTangents, bool bWantsHighPrecisionUVs, int32 NumUVs, bool bWants32BitIndices, bool bCreateCollision, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average);
 
