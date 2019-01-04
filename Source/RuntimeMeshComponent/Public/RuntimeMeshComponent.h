@@ -91,11 +91,27 @@ public:
 	// Wrapper functions --------------------------------------------------------------------------------------------------------------------------------
 
 		/*
-		Uses the correct function and checks for mesh validity to avoid crashes and improve performance
-		bCreateCollision and UpdateFrequency will only be used if the section is being created
-		*/
+		 * Creates the mesh section if it doesn't exist,
+		 * Otherwise update the section.
+		 * Will automatically delete the section if there are no vertices given
+		 */
 		template<typename VertexType0, typename IndexType>
 		void SetMeshSection(int32 SectionIndex, TArray<VertexType0>& InVertices0, TArray<IndexType>& InTriangles, bool bCreateCollision = false,
+			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
+		{
+			auto Vertices0 = TArray<TArray<VertexType0>>({ InVertices0 });
+			auto Triangles = TArray<TArray<IndexType>>({ InTriangles });
+			SetMeshSection(SectionIndex, Vertices0, Triangles, bCreateCollision, UpdateFrequency, UpdateFlags);
+		}
+
+
+		/*
+		 * Creates the mesh section if it doesn't exist,
+		 * Otherwise update the section.
+		 * Will automatically delete the section if there are no vertices given
+		 */
+		template<typename VertexType0, typename IndexType>
+		void SetMeshSection(int32 SectionIndex, TArray<TArray<VertexType0>>& InVertices0, TArray<TArray<IndexType>>& InTriangles, bool bCreateCollision = false,
 			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None) 
 		{
 			check(IsInGameThread())
@@ -104,7 +120,10 @@ public:
 					GetOrCreateRuntimeMeshData()->ClearMeshSection(SectionIndex);
 				}
 				else {
-					GetOrCreateRuntimeMeshData()->UpdateMeshSection(SectionIndex, InVertices0, InTriangles, UpdateFlags);
+					for (int32 LODIndex = 0; LODIndex < FMath::Min(InVertices0.Num(), InTriangles.Num()); LODIndex++)
+					{
+						GetOrCreateRuntimeMeshData()->UpdateMeshSection(SectionIndex, LODIndex, InVertices0[LODIndex], InTriangles[LODIndex], UpdateFlags);
+					}
 				}
 			}
 			else if (InVertices0.Num() != 0) {
@@ -113,9 +132,10 @@ public:
 		}
 
 		/*
-		Uses the correct function and checks for mesh validity to avoid crashes and improve performance
-		bCreateCollision and UpdateFrequency will only be used if the section is being created
-		*/
+		 * Creates the mesh section if it doesn't exist,
+		 * Otherwise update the section.
+		 * Will automatically delete the section if there are no vertices given
+		 */
 		void SetMeshSection(int32 SectionId, const TSharedPtr<FRuntimeMeshBuilder>& MeshData, bool bCreateCollision = false,
 			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None)
 		{
@@ -134,11 +154,12 @@ public:
 		}
 
 		/*
-		Uses the correct function and checks for mesh validity to avoid crashes and improve performance
-		bCreateCollision and UpdateFrequency will only be used if the section is being created
-		*/
-		void SetMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
-			const TArray<FVector2D>& UV0, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, bool bCreateCollision = false,
+		 * Creates the mesh section if it doesn't exist,
+		 * Otherwise update the section.
+		 * Will automatically delete the section if there are no vertices given
+		 */
+		void SetMeshSection(int32 SectionIndex, const TArray<TArray<FVector>>& Vertices, const TArray<TArray<int32>>& Triangles, const TArray<TArray<FVector>>& Normals,
+			const TArray<TArray<FVector2D>>& UV0, const TArray<TArray<FColor>>& Colors, const TArray<TArray<FRuntimeMeshTangent>>& Tangents, bool bCreateCollision = false,
 			EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, ESectionUpdateFlags UpdateFlags = ESectionUpdateFlags::None,
 			bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
 		{
@@ -148,22 +169,45 @@ public:
 					GetOrCreateRuntimeMeshData()->ClearMeshSection(SectionIndex);
 				}
 				else {
-					GetOrCreateRuntimeMeshData()->UpdateMeshSection(SectionIndex, Vertices, Normals, UV0, Colors, Tangents, UpdateFlags);
+					for (int32 LODIndex = 0; LODIndex < FMath::Min(Vertices.Num(), Triangles.Num()); LODIndex++)
+					{
+						GetOrCreateRuntimeMeshData()->UpdateMeshSection(SectionIndex, LODIndex, 
+							Vertices[LODIndex], 
+							Triangles[LODIndex], 
+							Normals.IsValidIndex(LODIndex) ? Normals[LODIndex] : TArray<FVector>(),
+							UV0.IsValidIndex(LODIndex) ? UV0[LODIndex] : TArray<FVector2D>(), 
+							Colors.IsValidIndex(LODIndex) ? Colors[LODIndex] : TArray<FColor>(),
+							Tangents.IsValidIndex(LODIndex) ? Tangents[LODIndex] : TArray<FRuntimeMeshTangent>(),
+							UpdateFlags);
+					}
 				}
 			}
 			else if (Vertices.Num() != 0) {
-				GetOrCreateRuntimeMeshData()->CreateMeshSection(SectionIndex, Vertices, Triangles, Normals, UV0, Colors, Tangents, bCreateCollision,
+				GetOrCreateRuntimeMeshData()->CreateMeshSection(SectionIndex, 0, Vertices[0], Triangles[0], Normals[0], UV0[0], Colors[0], Tangents[0], bCreateCollision,
 					UpdateFrequency, UpdateFlags, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
+
+				for (int32 LODIndex = 1; LODIndex < FMath::Min(Vertices.Num(), Triangles.Num()); LODIndex++)
+				{
+					GetOrCreateRuntimeMeshData()->UpdateMeshSection(SectionIndex, LODIndex,
+						Vertices[LODIndex],
+						Triangles[LODIndex],
+						Normals.IsValidIndex(LODIndex) ? Normals[LODIndex] : TArray<FVector>(),
+						UV0.IsValidIndex(LODIndex) ? UV0[LODIndex] : TArray<FVector2D>(),
+						Colors.IsValidIndex(LODIndex) ? Colors[LODIndex] : TArray<FColor>(),
+						Tangents.IsValidIndex(LODIndex) ? Tangents[LODIndex] : TArray<FRuntimeMeshTangent>(),
+						UpdateFlags);
+				}
 			}
 		}
 
 		/*
-		Uses the correct function and checks for mesh validity to avoid crashes and improve performance
-		bCreateCollision and UpdateFrequency will only be used if the section is being created
-		*/
+		 * Creates the mesh section if it doesn't exist,
+		 * Otherwise update the section.
+		 * Will automatically delete the section if there are no vertices given
+		 */
 		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Set Mesh Section", AutoCreateRefTerm = "Normals,Tangents,UV0,UV1,Colors"))
 			void SetMeshSection_Blueprint(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
-				const TArray<FRuntimeMeshTangent>& Tangents, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FLinearColor>& Colors,
+				const TArray<FRuntimeMeshTangent>& Tangents, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FLinearColor>& Colors, int32 LODIndex = 0,
 				bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false,
 				EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
 		{
@@ -174,21 +218,22 @@ public:
 				}
 				else {
 					GetOrCreateRuntimeMeshData()->UpdateMeshSection_Blueprint(SectionIndex, Vertices, Triangles, Normals, Tangents, UV0, UV1, Colors,
-						bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles);
+						bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles, LODIndex);
 				}
 			}
 			else if (Vertices.Num() != 0) {
 				GetOrCreateRuntimeMeshData()->CreateMeshSection_Blueprint(SectionIndex, Vertices, Triangles, Normals, Tangents, UV0, UV1, Colors, bCreateCollision,
-					bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
+					bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs, LODIndex);
 			}
 		}
 
 		/*
-		Uses the correct function and checks for mesh validity to avoid crashes and improve performance
-		bCreateCollision and UpdateFrequency will only be used if the section is being created
-		*/
+		 * Creates the mesh section if it doesn't exist,
+		 * Otherwise update the section.
+		 * Will automatically delete the section if there are no vertices given
+		 */
 		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Set Mesh Section Packed", AutoCreateRefTerm = "Normals,Tangents,UV0,UV1,Colors"))
-			void SetMeshSectionPacked_Blueprint(int32 SectionIndex, const TArray<FRuntimeMeshBlueprintVertexSimple>& Vertices, const TArray<int32>& Triangles,
+			void SetMeshSectionPacked_Blueprint(int32 SectionIndex, const TArray<FRuntimeMeshBlueprintVertexSimple>& Vertices, const TArray<int32>& Triangles, int32 LODIndex = 0,
 				bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false, EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average,
 				bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
 		{
@@ -199,12 +244,12 @@ public:
 				}
 				else {
 					GetOrCreateRuntimeMeshData()->UpdateMeshSectionPacked_Blueprint(SectionIndex, Vertices, Triangles, bCalculateNormalTangent, bShouldCreateHardTangents,
-						bGenerateTessellationTriangles);
+						bGenerateTessellationTriangles, LODIndex);
 				}
 			}
 			else if (Vertices.Num() != 0) {
 				GetOrCreateRuntimeMeshData()->CreateMeshSectionPacked_Blueprint(SectionIndex, Vertices, Triangles, bCreateCollision, bCalculateNormalTangent, bShouldCreateHardTangents,
-					bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs);
+					bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs, LODIndex);
 			}
 		}
 
