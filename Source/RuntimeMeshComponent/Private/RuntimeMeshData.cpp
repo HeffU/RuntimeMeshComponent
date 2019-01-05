@@ -188,6 +188,17 @@ void FRuntimeMeshData::SetLODScreenSize(int32 LODIndex, float MinScreenSize)
 	//check(LODIndex == 0 || LODScreenSizes[LODIndex] < LODScreenSizes[LODIndex - 1]);
 }
 
+void FRuntimeMeshData::SetLODForCollision(int32 LODIndex)
+{
+	LODForCollision = LODIndex;
+	MarkCollisionDirty();
+}
+
+int32 FRuntimeMeshData::GetLODForCollision()
+{
+	return LODForCollision;
+}
+
 void FRuntimeMeshData::CreateMeshSection(int32 SectionIndex, bool bWantsHighPrecisionTangents, bool bWantsHighPrecisionUVs, int32 NumUVs, bool bWants32BitIndices, bool bCreateCollision, EUpdateFrequency UpdateFrequency /*= EUpdateFrequency::Average*/)
 {
 	SCOPE_CYCLE_COUNTER(STAT_RuntimeMesh_CreateMeshSection_NoData);
@@ -500,47 +511,47 @@ void FRuntimeMeshData::UpdateMeshSectionFromComponents(int32 SectionIndex, int32
 
 
 
-void FRuntimeMeshData::CreateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+void FRuntimeMeshData::CreateMeshSection(int32 SectionIndex, int32 LODIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
 	const TArray<FVector2D>& UV0, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, bool bCreateCollision, EUpdateFrequency UpdateFrequency,
 	ESectionUpdateFlags UpdateFlags, bool bUseHighPrecisionTangents, bool bUseHighPrecisionUVs)
 {
-	CreateMeshSectionFromComponents(SectionIndex, 0, Vertices, Triangles, Normals, UV0, TArray<FVector2D>(), [&Colors](int32 Index) -> FColor { return Colors[Index]; },
+	CreateMeshSectionFromComponents(SectionIndex, LODIndex, Vertices, Triangles, Normals, UV0, TArray<FVector2D>(), [&Colors](int32 Index) -> FColor { return Colors[Index]; },
 		Colors.Num(), Tangents, bCreateCollision, UpdateFrequency, UpdateFlags, bUseHighPrecisionTangents, bUseHighPrecisionUVs, false);
 }
 
-void FRuntimeMeshData::CreateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+void FRuntimeMeshData::CreateMeshSection(int32 SectionIndex, int32 LODIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
 	const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents,
 	bool bCreateCollision, EUpdateFrequency UpdateFrequency, ESectionUpdateFlags UpdateFlags, bool bUseHighPrecisionTangents, bool bUseHighPrecisionUVs)
 {
-	CreateMeshSectionFromComponents(SectionIndex, 0, Vertices, Triangles, Normals, UV0, UV1, [&Colors](int32 Index) -> FColor { return Colors[Index]; },
+	CreateMeshSectionFromComponents(SectionIndex, LODIndex, Vertices, Triangles, Normals, UV0, UV1, [&Colors](int32 Index) -> FColor { return Colors[Index]; },
 		Colors.Num(), Tangents, bCreateCollision, UpdateFrequency, UpdateFlags, bUseHighPrecisionTangents, bUseHighPrecisionUVs, true);
 }
 
-void FRuntimeMeshData::UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0,
+void FRuntimeMeshData::UpdateMeshSection(int32 SectionIndex, int32 LODIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0,
 	const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags)
 {
-	UpdateMeshSectionFromComponents(SectionIndex, 0, Vertices, TArray<int32>(), Normals, UV0, TArray<FVector2D>(),
+	UpdateMeshSectionFromComponents(SectionIndex, LODIndex, Vertices, TArray<int32>(), Normals, UV0, TArray<FVector2D>(),
 		[&Colors](int32 Index) -> FColor { return Colors[Index]; }, Colors.Num(), Tangents, UpdateFlags);
 }
 
-void FRuntimeMeshData::UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0,
+void FRuntimeMeshData::UpdateMeshSection(int32 SectionIndex, int32 LODIndex, const TArray<FVector>& Vertices, const TArray<FVector>& Normals, const TArray<FVector2D>& UV0,
 	const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags)
 {
-	UpdateMeshSectionFromComponents(SectionIndex, 0, Vertices, TArray<int32>(), Normals, UV0, UV1,
+	UpdateMeshSectionFromComponents(SectionIndex, LODIndex, Vertices, TArray<int32>(), Normals, UV0, UV1,
 		[&Colors](int32 Index) -> FColor { return Colors[Index]; }, Colors.Num(), Tangents, UpdateFlags);
 }
 
-void FRuntimeMeshData::UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+void FRuntimeMeshData::UpdateMeshSection(int32 SectionIndex, int32 LODIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
 	const TArray<FVector2D>& UV0, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags)
 {
-	UpdateMeshSectionFromComponents(SectionIndex, 0, Vertices, Triangles, Normals, UV0, TArray<FVector2D>(),
+	UpdateMeshSectionFromComponents(SectionIndex, LODIndex, Vertices, Triangles, Normals, UV0, TArray<FVector2D>(),
 		[&Colors](int32 Index) -> FColor { return Colors[Index]; }, Colors.Num(), Tangents, UpdateFlags);
 }
 
-void FRuntimeMeshData::UpdateMeshSection(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
+void FRuntimeMeshData::UpdateMeshSection(int32 SectionIndex, int32 LODIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
 	const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FColor>& Colors, const TArray<FRuntimeMeshTangent>& Tangents, ESectionUpdateFlags UpdateFlags)
 {
-	UpdateMeshSectionFromComponents(SectionIndex, 0, Vertices, Triangles, Normals, UV0, UV1,
+	UpdateMeshSectionFromComponents(SectionIndex, LODIndex, Vertices, Triangles, Normals, UV0, UV1,
 		[&Colors](int32 Index) -> FColor { return Colors[Index]; }, Colors.Num(), Tangents, UpdateFlags);
 }
 
@@ -1388,7 +1399,7 @@ bool FRuntimeMeshData::GetPhysicsTriMeshData(struct FTriMeshCollisionData* Colli
 		if (MeshSections[SectionId].IsValid() && MeshSections[SectionId]->IsCollisionEnabled())
 		{
 			TArray<FVector2D> UVs;
-			int32 NumTriangles = MeshSections[SectionId]->GetCollisionData(CollisionData->Vertices, CollisionData->Indices, UVs);
+			int32 NumTriangles = MeshSections[SectionId]->GetCollisionData(LODForCollision, CollisionData->Vertices, CollisionData->Indices, UVs);
 
 			if (bCopyUVs)
 			{
@@ -1531,34 +1542,9 @@ void FRuntimeMeshData::SendSectionPropertiesUpdate(int32 SectionIndex)
 
 int32 FRuntimeMeshData::GetSectionFromCollisionFaceIndex(int32 FaceIndex) const
 {
-	SCOPE_CYCLE_COUNTER(STAT_RuntimeMesh_GetSectionFromCollisionFaceIndex);
+	int32 FaceIdx = FaceIndex;
 
-	FRuntimeMeshScopeLock Lock(SyncRoot);
-
-	int32 SectionIndex = 0;
-
-	// Look for element that corresponds to the supplied face
-	int32 TotalFaceCount = 0;
-
-	for (int32 SectionIdx = 0; SectionIdx < MeshSections.Num(); SectionIdx++)
-	{
-		const FRuntimeMeshSectionPtr& Section = MeshSections[SectionIdx];
-
-		if (Section.IsValid() && Section->IsCollisionEnabled())
-		{
-			int32 NumFaces = Section->GetNumIndices(0) / 3;
-			TotalFaceCount += NumFaces;
-
-			if (FaceIndex < TotalFaceCount)
-			{
-				// Grab the material
-				SectionIndex = SectionIdx;
-				break;
-			}
-		}
-	}
-
-	return SectionIndex;
+	return GetSectionAndFaceFromCollisionFaceIndex(FaceIdx);
 }
 /*
 * Gets the section ID from the given face index reference,
@@ -1581,7 +1567,7 @@ int32 FRuntimeMeshData::GetSectionAndFaceFromCollisionFaceIndex(int32& FaceIndex
 
 		if (Section.IsValid() && Section->IsCollisionEnabled())
 		{
-			int32 NumFaces = Section->GetNumIndices(0) / 3;
+			int32 NumFaces = Section->GetNumIndices(LODForCollision) / 3;
 
 			if (FaceIndex < TotalFaceCount + NumFaces)
 			{

@@ -262,12 +262,12 @@ void URuntimeMeshSlicer::SliceRuntimeMeshConvexCollision(URuntimeMesh* InRuntime
 	}
 
 	// Update collision of runtime mesh
-	InRuntimeMesh->SetCollisionConvexMeshes(SlicedCollision);
+	InRuntimeMesh->GetRuntimeMeshData()->SetCollisionConvexMeshes(SlicedCollision);
 
 	// Set collision for other mesh
 	if (bCreateOtherHalf)
 	{
-		OutOtherHalf->SetCollisionConvexMeshes(OtherSlicedCollision);
+		OutOtherHalf->GetRuntimeMeshData()->SetCollisionConvexMeshes(OtherSlicedCollision);
 	}
 }
 
@@ -635,15 +635,15 @@ void URuntimeMeshSlicer::SliceRuntimeMesh(URuntimeMesh* InRuntimeMesh, FVector P
 		// Set of new edges created by clipping polys by plane
 		TArray<FUtilEdge3D> ClipEdges;
 
-		for (int32 SectionIndex = 0; SectionIndex < InRuntimeMesh->GetNumSections(); SectionIndex++)
+		for (int32 SectionIndex = 0; SectionIndex < InRuntimeMesh->GetRuntimeMeshData()->GetNumSections(); SectionIndex++)
 		{
 			// Skip if the section doesn't exist
-			if (!InRuntimeMesh->DoesSectionExist(SectionIndex))
+			if (!InRuntimeMesh->GetRuntimeMeshData()->DoesSectionExist(SectionIndex))
 			{
 				continue;
 			}
 
-			auto MeshData = InRuntimeMesh->GetSectionReadonly(SectionIndex);
+			auto MeshData = InRuntimeMesh->GetRuntimeMeshData()->GetSectionReadonly(SectionIndex);
 
 			// Skip if we don't have mesh data
 			if (MeshData->NumVertices() < 3 || MeshData->NumIndices() < 3)
@@ -652,7 +652,7 @@ void URuntimeMeshSlicer::SliceRuntimeMesh(URuntimeMesh* InRuntimeMesh, FVector P
 			}
 
 			// Compare bounding box of section with slicing plane
-			int32 BoxCompare = CompareBoxPlane(InRuntimeMesh->GetSectionBoundingBox(SectionIndex), SlicePlane);
+			int32 BoxCompare = CompareBoxPlane(InRuntimeMesh->GetRuntimeMeshData()->GetSectionBoundingBox(SectionIndex), SlicePlane);
 
 			if (BoxCompare == 1)
 			{
@@ -665,16 +665,16 @@ void URuntimeMeshSlicer::SliceRuntimeMesh(URuntimeMesh* InRuntimeMesh, FVector P
 				// Box totally on the far side of the plane, move the entire section to the other RMC if it exists
 				if (bShouldCreateOtherHalf)
 				{
-					auto SourceMeshData = InRuntimeMesh->GetSectionReadonly(SectionIndex);
+					auto SourceMeshData = InRuntimeMesh->GetRuntimeMeshData()->GetSectionReadonly(SectionIndex);
 
 					auto NewBuilder = MakeRuntimeMeshBuilder(*SourceMeshData.Get());
 					SourceMeshData->CopyTo(NewBuilder);
 
-					OutOtherHalf->CreateMeshSection(SectionIndex, MoveTemp(NewBuilder));
+					OutOtherHalf->GetRuntimeMeshData()->CreateMeshSection(SectionIndex, MoveTemp(NewBuilder));
 					OutOtherHalf->SetSectionMaterial(SectionIndex, InRuntimeMesh->GetSectionMaterial(SectionIndex));
 				}
 
-				InRuntimeMesh->ClearMeshSection(SectionIndex);
+				InRuntimeMesh->GetRuntimeMeshData()->ClearMeshSection(SectionIndex);
 				continue;
 			}
 
@@ -728,11 +728,11 @@ void URuntimeMeshSlicer::SliceRuntimeMeshComponent(URuntimeMeshComponent* InRunt
 
 		if (bCreateOtherHalf)
 		{
-			if (OutOtherHalf->GetNumSections() > 0)
+			if (OutOtherHalf->GetRuntimeMeshData()->GetNumSections() > 0)
 			{
 				OutOtherHalf->SetCollisionProfileName(InRuntimeMesh->GetCollisionProfileName());
 				OutOtherHalf->SetCollisionEnabled(InRuntimeMesh->GetCollisionEnabled());
-				OutOtherHalf->SetCollisionUseComplexAsSimple(InRuntimeMesh->IsCollisionUsingComplexAsSimple());
+				OutOtherHalf->GetOrCreateRuntimeMesh()->SetCollisionUseComplexAsSimple(InRuntimeMesh->GetOrCreateRuntimeMesh()->IsCollisionUsingComplexAsSimple());
 
 				// Copy overridden materials
 				for (int32 Index = 0; Index < InRuntimeMesh->GetNumOverrideMaterials(); Index++)
