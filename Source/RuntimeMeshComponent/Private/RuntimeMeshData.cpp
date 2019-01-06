@@ -177,6 +177,7 @@ void FRuntimeMeshData::EnterSerializedMode()
 
 void FRuntimeMeshData::SetLODScreenSize(int32 LODIndex, float MinScreenSize)
 {
+	UE_LOG(RuntimeMeshLog, Log, TEXT("Setting LOD screen size"));
 	if (LODIndex >= LODScreenSizes.Num())
 	{
 		LODScreenSizes.SetNum(LODIndex + 1);
@@ -1275,11 +1276,16 @@ void FRuntimeMeshData::UpdateSectionPropertiesInternal(int32 SectionIndex, bool 
 
 void FRuntimeMeshData::UpdateLODDataInternal()
 {
+	UE_LOG(RuntimeMeshLog, Log, TEXT("Updating LOD Data"));
 	if (RenderProxy.IsValid())
 	{
+		UE_LOG(RuntimeMeshLog, Log, TEXT("RenderProxy is valid"));
 		FRuntimeMeshLODDataUpdateParamsPtr UpdateParams = MakeShared<FRuntimeMeshLODDataUpdateParams>();
 		UpdateParams->ScreenSizes = LODScreenSizes;
 		RenderProxy->UpdateLODData_GameThread(UpdateParams);
+	}
+	else {
+		UE_LOG(RuntimeMeshLog, Warning, TEXT("RenderProxy is invalid"));
 	}
 
 	bool bRequiresRecreate = false;
@@ -1293,6 +1299,7 @@ void FRuntimeMeshData::UpdateLODDataInternal()
 
 	if (bRequiresRecreate)
 	{
+		UE_LOG(RuntimeMeshLog, Warning, TEXT("RenderState require recreation"));
 		MarkRenderStateDirty();
 	}
 }
@@ -1324,8 +1331,10 @@ void FRuntimeMeshData::UpdateLocalBounds()
 
 FRuntimeMeshProxyPtr FRuntimeMeshData::EnsureProxyCreated(ERHIFeatureLevel::Type InFeatureLevel)
 {
+	UE_LOG(RuntimeMeshLog, Log, TEXT("Ensuring Proxy created"));
 	if (!RenderProxy.IsValid())
 	{
+		UE_LOG(RuntimeMeshLog, Warning, TEXT("Created render proxy"));
 		RenderProxy = MakeShareable(new FRuntimeMeshProxy(InFeatureLevel), FRuntimeMeshRenderThreadDeleter<FRuntimeMeshProxy>());
 		Initialize();
 	}

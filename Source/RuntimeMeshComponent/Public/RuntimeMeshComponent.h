@@ -10,6 +10,14 @@
 #include "RuntimeMesh.h"
 #include "RuntimeMeshComponent.generated.h"
 
+UENUM(BlueprintType)		//"BlueprintType" is essential to include
+enum class ERuntimeMeshSetAction : uint8
+{
+	Create 	UMETA(DisplayName = "Created new section"),
+	Update 	UMETA(DisplayName = "Updated section"),
+	Remove	UMETA(DisplayName = "Removed section"),
+	None	UMETA(DisplayName = "Did nothing")
+};
 /**
 *	Component that allows you to specify custom triangle mesh geometry for rendering and collision.
 */
@@ -84,6 +92,9 @@ public:
 			NewMobility == ERuntimeMeshMobility::Movable ? EComponentMobility::Movable :
 			NewMobility == ERuntimeMeshMobility::Stationary ? EComponentMobility::Stationary : EComponentMobility::Static);
 	}
+
+	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Set LOD screen size"))
+	void SetLODScreenSize_Blueprint(int32 LODIndex = 0, float MinScreenSize = 0.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh")
 	void SetRuntimeMesh(URuntimeMesh* NewMesh);
@@ -207,7 +218,7 @@ public:
 		 */
 		UFUNCTION(BlueprintCallable, Category = "Components|RuntimeMesh", meta = (DisplayName = "Set Mesh Section", AutoCreateRefTerm = "Normals,Tangents,UV0,UV1,Colors"))
 			void SetMeshSection_Blueprint(int32 SectionIndex, const TArray<FVector>& Vertices, const TArray<int32>& Triangles, const TArray<FVector>& Normals,
-				const TArray<FRuntimeMeshTangent>& Tangents, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FLinearColor>& Colors, int32 LODIndex = 0,
+				const TArray<FRuntimeMeshTangent>& Tangents, const TArray<FVector2D>& UV0, const TArray<FVector2D>& UV1, const TArray<FLinearColor>& Colors, ERuntimeMeshSetAction& ActionDone, int32 LODIndex = 0,
 				bool bCreateCollision = false, bool bCalculateNormalTangent = false, bool bShouldCreateHardTangents = false, bool bGenerateTessellationTriangles = false,
 				EUpdateFrequency UpdateFrequency = EUpdateFrequency::Average, bool bUseHighPrecisionTangents = false, bool bUseHighPrecisionUVs = true)
 		{
@@ -215,15 +226,21 @@ public:
 			if (GetOrCreateRuntimeMeshData()->DoesSectionExist(SectionIndex)) {
 				if (Vertices.Num() == 0) {
 					GetOrCreateRuntimeMeshData()->ClearMeshSection(SectionIndex);
+					ActionDone = ERuntimeMeshSetAction::Remove;
 				}
 				else {
 					GetOrCreateRuntimeMeshData()->UpdateMeshSection_Blueprint(SectionIndex, Vertices, Triangles, Normals, Tangents, UV0, UV1, Colors,
 						bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles, LODIndex);
+					ActionDone = ERuntimeMeshSetAction::Update;
 				}
 			}
 			else if (Vertices.Num() != 0) {
 				GetOrCreateRuntimeMeshData()->CreateMeshSection_Blueprint(SectionIndex, Vertices, Triangles, Normals, Tangents, UV0, UV1, Colors, bCreateCollision,
 					bCalculateNormalTangent, bShouldCreateHardTangents, bGenerateTessellationTriangles, UpdateFrequency, bUseHighPrecisionTangents, bUseHighPrecisionUVs, LODIndex);
+				ActionDone = ERuntimeMeshSetAction::Create;
+			}
+			else {
+				ActionDone = ERuntimeMeshSetAction::None;
 			}
 		}
 

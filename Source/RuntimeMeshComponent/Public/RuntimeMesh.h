@@ -301,6 +301,11 @@ private:
 	void FinalizeNewCookedData();
 #endif
 
+	FRuntimeMeshProxyPtr EnsureProxyCreated(ERHIFeatureLevel::Type InFeatureLevel)
+	{
+		return GetRuntimeMeshData()->EnsureProxyCreated(InFeatureLevel);
+	}
+
 	void UpdateLocalBounds();
 
 	void ForceProxyRecreate();

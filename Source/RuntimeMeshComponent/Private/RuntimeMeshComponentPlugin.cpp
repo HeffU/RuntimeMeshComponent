@@ -4,6 +4,8 @@
 #include "CustomVersion.h"
 #include "RuntimeMeshCore.h"
 
+DEFINE_LOG_CATEGORY(RuntimeMeshLog);
+
 // Register the custom version with core
 FCustomVersionRegistration GRegisterRuntimeMeshCustomVersion(FRuntimeMeshVersion::GUID, FRuntimeMeshVersion::LatestVersion, TEXT("RuntimeMesh"));
 
@@ -27,5 +29,3 @@ void FRuntimeMeshComponentPlugin::ShutdownModule()
 {
 
 }
-
-DEFINE_LOG_CATEGORY(RuntimeMeshLog);

@@ -41,6 +41,13 @@ void URuntimeMeshComponent::EnsureHasRuntimeMesh()
 	}
 }
 
+void URuntimeMeshComponent::SetLODScreenSize_Blueprint(int32 LODIndex, float MinScreenSize)
+{
+	
+	UE_LOG(LogTemp, Log, TEXT("Setting LOD screen size"));
+	GetOrCreateRuntimeMeshData()->SetLODScreenSize(LODIndex, MinScreenSize);
+}
+
 void URuntimeMeshComponent::SetRuntimeMesh(URuntimeMesh* NewMesh)
 {
 	// Unlink from any existing runtime mesh
@@ -122,6 +129,7 @@ FBoxSphereBounds URuntimeMeshComponent::CalcBounds(const FTransform& LocalToWorl
 
 FPrimitiveSceneProxy* URuntimeMeshComponent::CreateSceneProxy()
 {
+	UE_LOG(LogTemp, Log, TEXT("Creating scene proxy"));
 	return RuntimeMeshReference != nullptr ? new FRuntimeMeshComponentSceneProxy(this) : nullptr;
 }
 

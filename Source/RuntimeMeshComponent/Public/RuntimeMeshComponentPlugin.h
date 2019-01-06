@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "ModuleManager.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(RuntimeMeshLog, Log, All);
+
 /**
 * The public interface to this module
 */
@@ -34,5 +36,3 @@ public:
 		return FModuleManager::Get().IsModuleLoaded("RuntimeMeshComponent");
 	}
 };
-
-DECLARE_LOG_CATEGORY_EXTERN(RuntimeMeshLog, Log, All);
